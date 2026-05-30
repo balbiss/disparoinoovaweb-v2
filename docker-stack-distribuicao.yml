@@ -43,6 +43,8 @@ services:
       - FRONTEND_URL=https://${DOMAIN_FRONTEND}
       - DEFAULT_COMPANY_NAME=${COMPANY_NAME:-Nome da Sua Empresa}
       - DEFAULT_LOGO_URL=${LOGO_URL:-}
+      - SUPERADMIN_EMAIL=${SUPERADMIN_EMAIL:-admin@empresa.com}
+      - SUPERADMIN_PASSWORD=${SUPERADMIN_PASSWORD:-Admin123}
     volumes:
       - uploads_data:/app/uploads
       - backups_data:/app/backups

@@ -514,13 +514,13 @@ export function WhatsAppConnectionsPage() {
           <div className="flex gap-3">
             <button
               onClick={() => setCreateSessionModalOpen(true)}
-              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 text-sm font-medium transition-colors"
+              className="btn-primary"
             >
               + Nova Sessão
             </button>
             <button
               onClick={() => loadSessions()}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium transition-colors"
+              className="btn-primary"
             >
               Atualizar
             </button>

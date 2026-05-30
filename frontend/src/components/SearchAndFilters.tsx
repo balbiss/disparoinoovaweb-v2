@@ -49,7 +49,7 @@ export function SearchAndFilters({
             placeholder="Buscar por nome, telefone ou email..."
             value={search}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="input-field py-2"
             aria-label="Campo de busca para contatos"
           />
         </div>
@@ -62,7 +62,7 @@ export function SearchAndFilters({
             id="category"
             value={selectedCategory}
             onChange={(e) => onCategoryChange(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="input-field py-2"
             aria-label="Filtrar por categoria"
           >
             <option value="">Todas as categorias</option>

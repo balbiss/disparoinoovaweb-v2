@@ -178,7 +178,7 @@ export function ContactsPage() {
               <>
                 <button
                   onClick={handleOpenCategoryModal}
-                  className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm font-medium transition-colors"
+                  className="btn-primary"
                   aria-label="Gerenciar categorias"
                 >
                   Categorias

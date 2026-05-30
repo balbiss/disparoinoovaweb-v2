@@ -2223,8 +2223,8 @@ export function SuperAdminManagerPage() {
 
       {/* Modal WAHA */}
       {activeModal === 'waha' && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md mx-auto max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold text-gray-900">🔗 Configurar WAHA</h3>
               <button
@@ -2295,8 +2295,8 @@ export function SuperAdminManagerPage() {
 
       {/* Modal Evolution API */}
       {activeModal === 'evolution' && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md mx-auto max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold text-gray-900">🚀 Configurar Evolution API</h3>
               <button
@@ -2367,8 +2367,8 @@ export function SuperAdminManagerPage() {
 
       {/* Modal Quepasa */}
       {activeModal === 'quepasa' && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md mx-auto max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-4">
               <div className="flex items-center gap-2">
                 <img src="/logoquepasa.png?v=2" alt="Quepasa" className="w-6 h-6 object-contain" />

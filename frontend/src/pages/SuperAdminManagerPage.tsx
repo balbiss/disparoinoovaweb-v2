@@ -2055,7 +2055,7 @@ export function SuperAdminManagerPage() {
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
                 <p className="text-xs text-gray-500 mt-1">
-                  Formatos aceitos: JPEG, PNG, GIF, WebP (max 5MB)
+                  Formatos aceitos: JPEG, PNG, GIF, WebP (max 20MB)
                 </p>
               </div>
 
@@ -2125,7 +2125,7 @@ export function SuperAdminManagerPage() {
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
                 <p className="text-xs text-gray-500 mt-1">
-                  Recomendado: PNG, 64x64px ou similar (max 5MB)
+                  Recomendado: PNG, 64x64px ou similar (max 20MB)
                 </p>
               </div>
 

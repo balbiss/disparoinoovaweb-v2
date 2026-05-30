@@ -3,23 +3,23 @@ version: '3.8'
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: disparoinoova_postgres
+    container_name: disparoinoova_postgres_v2
     environment:
       - POSTGRES_DB=contacts
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres123
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - postgres_data_local:/var/lib/postgresql/data
     restart: unless-stopped
 
   redis:
     image: redis:7-alpine
-    container_name: disparoinoova_redis
+    container_name: disparoinoova_redis_v2
     command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
     ports:
-      - "6379:6379"
+      - "6380:6379"
     volumes:
       - redis_data_local:/data
     restart: unless-stopped

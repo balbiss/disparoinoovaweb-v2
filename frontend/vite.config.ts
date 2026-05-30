@@ -5,11 +5,11 @@ export default defineConfig({
   plugins: [react()],
   esbuild: false,
   server: {
-    port: 3006,
+    port: 3007,
     host: true,
     proxy: {
       '/api': {
-        target: 'http://localhost:3003',
+        target: 'http://localhost:3004',
         changeOrigin: true,
         secure: false,
       }

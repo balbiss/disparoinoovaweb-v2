@@ -1,0 +1,108 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      - POSTGRES_DB=contacts
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - inoovawebpro
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+      restart_policy:
+        condition: on-failure
+
+  redis:
+    image: redis:7-alpine
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_data:/data
+    networks:
+      - inoovawebpro
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+      restart_policy:
+        condition: on-failure
+
+  backend:
+    image: inoovaweb/inoova-backend:latest
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/contacts?schema=public
+      REDIS_URL: redis://redis:6379
+      REDIS_PREFIX: work_app
+      PORT: 3001
+      NODE_ENV: production
+      JWT_SECRET: your-super-secret-jwt-key-at-least-32-characters-long-trecofantastico
+      JWT_EXPIRES_IN: 24h
+      APP_URL: https://disparo.inoovaweb.com.br
+      ALLOWED_ORIGINS: https://disparo.inoovaweb.com.br,http://disparo.inoovaweb.com.br
+      DEFAULT_COMPANY_NAME: "InoovaWeb"
+      DEFAULT_PAGE_TITLE: "Extrator de Leads - InoovaWeb"
+    networks:
+      - inoovawebpro
+    depends_on:
+      - postgres
+      - redis
+    volumes:
+      - contacts_data:/app/data
+      - uploads_data:/app/uploads
+      - backup_data:/app/backups
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+      restart_policy:
+        condition: on-failure
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.disparo-backend-https.rule=Host(`beck-disparo.inoovaweb.com.br`)
+        - traefik.http.routers.disparo-backend-https.entrypoints=websecure
+        - traefik.http.routers.disparo-backend-https.priority=1
+        - traefik.http.routers.disparo-backend-https.tls.certresolver=letsencryptresolver
+        - traefik.http.routers.disparo-backend-https.service=disparo-backend
+        - traefik.http.services.disparo-backend.loadbalancer.server.port=3001
+        - traefik.http.services.disparo-backend.loadbalancer.passHostHeader=true
+
+  frontend:
+    image: inoovaweb/inoova-frontend:latest
+    networks:
+      - inoovawebpro
+    depends_on:
+      - backend
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+      restart_policy:
+        condition: on-failure
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.disparo-frontend-https.rule=Host(`disparo.inoovaweb.com.br`)
+        - traefik.http.routers.disparo-frontend-https.entrypoints=websecure
+        - traefik.http.routers.disparo-frontend-https.priority=1
+        - traefik.http.routers.disparo-frontend-https.tls.certresolver=letsencryptresolver
+        - traefik.http.routers.disparo-frontend-https.service=disparo-frontend
+        - traefik.http.services.disparo-frontend.loadbalancer.server.port=80
+        - traefik.http.services.disparo-frontend.loadbalancer.passHostHeader=true
+
+networks:
+  inoovawebpro:
+    external: true
+    name: inoovawebpro
+
+volumes:
+  postgres_data:
+  redis_data:
+  contacts_data:
+  uploads_data:
+  backup_data:

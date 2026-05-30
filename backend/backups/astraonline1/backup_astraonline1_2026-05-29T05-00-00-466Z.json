@@ -1,0 +1,44 @@
+{
+  "timestamp": "2026-05-29T05:00:00.568Z",
+  "version": "1.0",
+  "tenant": {
+    "id": "777bdc8c-5b7c-4cc8-a15e-2fdec7582214",
+    "slug": "astraonline1",
+    "name": "Astraonline1",
+    "active": true,
+    "allowedProviders": [
+      "WAHA",
+      "EVOLUTION",
+      "QUEPASA"
+    ],
+    "createdAt": "2026-05-29T04:19:40.640Z",
+    "updatedAt": "2026-05-29T04:19:40.640Z"
+  },
+  "data": {
+    "users": [
+      {
+        "id": "accabfd0-3731-4741-9745-0fdbbd0afd38",
+        "nome": "Administrador",
+        "email": "admin@astraonline.com.br",
+        "senha": "$2a$12$d5sKdzi5v1KYQwPdBGc4SeJYFM/U4/w7bkrHgQxUnIyRX2PFdjhhG",
+        "role": "ADMIN",
+        "ativo": true,
+        "tenantId": "777bdc8c-5b7c-4cc8-a15e-2fdec7582214",
+        "ultimoLogin": null,
+        "criadoEm": "2026-05-29T04:19:41.250Z",
+        "atualizadoEm": "2026-05-29T04:19:41.250Z"
+      }
+    ],
+    "contacts": [],
+    "campaigns": [],
+    "whatsAppSessions": [],
+    "notifications": []
+  },
+  "statistics": {
+    "usersCount": 1,
+    "contactsCount": 0,
+    "campaignsCount": 0,
+    "sessionsCount": 0,
+    "notificationsCount": 0
+  }
+}

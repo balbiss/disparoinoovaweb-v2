@@ -1,0 +1,89 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      - POSTGRES_DB=${DB_NAME:-contacts}
+      - POSTGRES_USER=${DB_USER:-postgres}
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-postgres}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - backend_net
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+      restart_policy:
+        condition: on-failure
+
+  redis:
+    image: redis:7-alpine
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_data:/data
+    networks:
+      - backend_net
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+      restart_policy:
+        condition: on-failure
+
+  backend:
+    image: inoovaweb/inoova-backend-v2:latest
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - DATABASE_URL=postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-postgres}@postgres:5432/${DB_NAME:-contacts}?schema=public
+      - REDIS_URL=redis://redis:6379
+      - JWT_SECRET=${JWT_SECRET:-sua_chave_secreta_super_segura_aqui_123}
+      - FRONTEND_URL=https://${DOMAIN}
+      - DEFAULT_COMPANY_NAME=${COMPANY_NAME:-Nome da Sua Empresa}
+      - DEFAULT_LOGO_URL=${LOGO_URL:-}
+    volumes:
+      - uploads_data:/app/uploads
+      - backups_data:/app/backups
+    networks:
+      - backend_net
+      - traefik_public
+    depends_on:
+      - postgres
+      - redis
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+      restart_policy:
+        condition: on-failure
+        max_attempts: 3
+
+  frontend:
+    image: inoovaweb/inoova-frontend-v2:latest
+    networks:
+      - backend_net
+      - traefik_public
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.frontend_${DOMAIN_SLUG:-app}.rule=Host(`${DOMAIN}`)"
+        - "traefik.http.routers.frontend_${DOMAIN_SLUG:-app}.entrypoints=websecure"
+        - "traefik.http.routers.frontend_${DOMAIN_SLUG:-app}.tls.certresolver=letsencrypt"
+        - "traefik.http.services.frontend_${DOMAIN_SLUG:-app}.loadbalancer.server.port=80"
+
+networks:
+  backend_net:
+    driver: overlay
+  traefik_public:
+    external: true
+
+volumes:
+  postgres_data:
+  redis_data:
+  uploads_data:
+  backups_data:

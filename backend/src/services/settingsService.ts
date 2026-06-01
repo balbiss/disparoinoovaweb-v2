@@ -52,7 +52,14 @@ export class SettingsService {
         logoUrl: null,
         faviconUrl: '/api/uploads/default_favicon.png',
         pageTitle: 'Sistema de Gestão de Contatos',
-        iconUrl: '/api/uploads/default_icon.png'
+        iconUrl: '/api/uploads/default_icon.png',
+        syncpayClientId: '',
+        syncpayClientSecret: '',
+        monthlyPrice: 0,
+        defaultQuotaUsers: 3,
+        defaultQuotaContacts: 500,
+        defaultQuotaCampaigns: 5,
+        defaultQuotaConnections: 1
       };
     }
   }
@@ -70,6 +77,14 @@ export class SettingsService {
     faviconUrl?: string | null;
     pageTitle?: string;
     iconUrl?: string | null;
+    syncpayClientId?: string;
+    syncpayClientSecret?: string;
+    monthlyPrice?: number;
+    defaultQuotaUsers?: number;
+    defaultQuotaContacts?: number;
+    defaultQuotaCampaigns?: number;
+    defaultQuotaConnections?: number;
+    defaultAllowedProviders?: string[];
   }) {
     try {
       // Buscar configuração existente
@@ -91,7 +106,15 @@ export class SettingsService {
             companyName: data.companyName !== undefined ? data.companyName : settings.companyName,
             faviconUrl: data.faviconUrl !== undefined ? data.faviconUrl : settings.faviconUrl,
             pageTitle: data.pageTitle !== undefined ? data.pageTitle : settings.pageTitle,
-            iconUrl: data.iconUrl !== undefined ? data.iconUrl : settings.iconUrl
+            iconUrl: data.iconUrl !== undefined ? data.iconUrl : settings.iconUrl,
+            syncpayClientId: data.syncpayClientId !== undefined ? data.syncpayClientId : settings.syncpayClientId,
+            syncpayClientSecret: data.syncpayClientSecret !== undefined ? data.syncpayClientSecret : settings.syncpayClientSecret,
+            monthlyPrice: data.monthlyPrice !== undefined ? data.monthlyPrice : settings.monthlyPrice,
+            defaultQuotaUsers: data.defaultQuotaUsers !== undefined ? data.defaultQuotaUsers : settings.defaultQuotaUsers,
+            defaultQuotaContacts: data.defaultQuotaContacts !== undefined ? data.defaultQuotaContacts : settings.defaultQuotaContacts,
+            defaultQuotaCampaigns: data.defaultQuotaCampaigns !== undefined ? data.defaultQuotaCampaigns : settings.defaultQuotaCampaigns,
+            defaultQuotaConnections: data.defaultQuotaConnections !== undefined ? data.defaultQuotaConnections : settings.defaultQuotaConnections,
+            defaultAllowedProviders: data.defaultAllowedProviders !== undefined ? data.defaultAllowedProviders : settings.defaultAllowedProviders
           }
         });
       } else {
@@ -110,7 +133,15 @@ export class SettingsService {
             companyName: data.companyName || 'Astra Campaign',
             faviconUrl: data.faviconUrl || '/api/uploads/default_favicon.png',
             pageTitle: data.pageTitle || 'Sistema de Gestão de Contatos',
-            iconUrl: data.iconUrl || '/api/uploads/default_icon.png'
+            iconUrl: data.iconUrl || '/api/uploads/default_icon.png',
+            syncpayClientId: data.syncpayClientId || '',
+            syncpayClientSecret: data.syncpayClientSecret || '',
+            monthlyPrice: data.monthlyPrice || 0,
+            defaultQuotaUsers: data.defaultQuotaUsers || 3,
+            defaultQuotaContacts: data.defaultQuotaContacts || 500,
+            defaultQuotaCampaigns: data.defaultQuotaCampaigns || 5,
+            defaultQuotaConnections: data.defaultQuotaConnections || 1,
+            defaultAllowedProviders: data.defaultAllowedProviders || ['WAHA', 'EVOLUTION', 'QUEPASA']
           }
         });
       }

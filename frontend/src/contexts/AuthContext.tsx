@@ -11,8 +11,17 @@ interface User {
   criadoEm: string;
 }
 
+interface Tenant {
+  id: string;
+  slug: string;
+  name: string;
+  active: boolean;
+  expiresAt?: string;
+}
+
 interface AuthContextType {
   user: User | null;
+  tenant: Tenant | null;
   token: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
@@ -33,6 +42,7 @@ const API_BASE_URL = '/api';
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [tenant, setTenant] = useState<Tenant | null>(null);
   const [token, setToken] = useState<string | null>(localStorage.getItem('auth_token'));
   const [isLoading, setIsLoading] = useState(true);
 
@@ -70,6 +80,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       if (!response.ok) {
         toast.error(data.message || 'Erro ao fazer login');
+        if (response.status === 402 && data.paymentExpired) {
+          setTimeout(() => {
+            window.location.href = '/renew';
+          }, 2000);
+        }
         return false;
       }
 
@@ -92,6 +107,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const logout = () => {
     setUser(null);
+    setTenant(null);
     setToken(null);
     localStorage.removeItem('auth_token');
     toast.success('Logout realizado com sucesso!');
@@ -113,6 +129,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       const data = await response.json();
       setUser(data.data.user);
+      if (data.data.tenant) {
+        setTenant(data.data.tenant);
+      }
       return true;
     } catch (error) {
       console.error('Erro ao verificar autenticação:', error);
@@ -140,6 +159,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         logout();
       }
 
+      if (response.status === 402 && isAuthenticated && args[0]?.toString().includes('/api/')) {
+        console.log('Assinatura expirada, redirecionando para renovação...');
+        window.location.href = '/renew';
+      }
+
       return response;
     };
 
@@ -150,6 +174,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const value: AuthContextType = {
     user,
+    tenant,
     token,
     isAuthenticated,
     isLoading,

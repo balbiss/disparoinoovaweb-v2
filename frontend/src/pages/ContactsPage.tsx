@@ -137,7 +137,7 @@ export function ContactsPage() {
           <p className="text-gray-600 mb-4">{error}</p>
           <button
             onClick={refresh}
-            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="btn-primary"
           >
             Tentar novamente
           </button>
@@ -161,14 +161,14 @@ export function ContactsPage() {
               <>
                 <button
                   onClick={handleOpenBulkEdit}
-                  className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm font-medium transition-colors"
+                  className="btn-primary"
                   aria-label="Editar contatos selecionados"
                 >
                   Editar Selecionados ({selectedContactIds.length})
                 </button>
                 <button
                   onClick={() => setSelectedContactIds([])}
-                  className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 text-sm font-medium transition-colors"
+                  className="btn-secondary"
                   aria-label="Cancelar seleção"
                 >
                   Cancelar Seleção

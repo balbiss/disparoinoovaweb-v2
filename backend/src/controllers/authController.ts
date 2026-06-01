@@ -84,7 +84,9 @@ export const login = async (req: Request, res: Response): Promise<void> => {
             id: true,
             slug: true,
             name: true,
-            active: true
+            active: true,
+            paymentStatus: true,
+            expiresAt: true
           }
         }
       }
@@ -101,18 +103,21 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     if (!user.ativo) {
       res.status(401).json({
         success: false,
-        message: 'Usuário inativo. Entre em contato com o administrador.'
+        message: 'Seu usuário foi desativado. Peça ao administrador da sua empresa para reativar seu acesso.'
       });
       return;
     }
 
     // Verificar se o tenant está ativo (SUPERADMIN não tem tenant)
-    if (user.tenant && !user.tenant.active) {
-      res.status(401).json({
-        success: false,
-        message: 'Tenant inativo. Entre em contato com o suporte.'
-      });
-      return;
+    if (user.tenant) {
+      if (!user.tenant.active) {
+        res.status(401).json({
+          success: false,
+          message: 'A conta da sua empresa foi suspensa. Por favor, entre em contato com nosso suporte para regularizar o acesso.'
+        });
+        return;
+      }
+
     }
 
     // Verificar senha
@@ -133,7 +138,22 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     });
 
     // Gerar token com tenantId (SUPERADMIN tem tenantId undefined)
-    const token = generateToken(user.id, user.email, user.role, user.tenantId || undefined);
+    const token = generateToken(user.id, user.email, user.role, user.tenant?.id || undefined);
+
+    if (user.tenant) {
+      const now = new Date();
+      // @ts-ignore
+      const isExpired = user.tenant.paymentStatus === 'EXPIRED' || (user.tenant.expiresAt && new Date(user.tenant.expiresAt) < now) || user.tenant.paymentStatus === 'PENDING';
+      if (isExpired) {
+        res.status(402).json({
+          success: false,
+          message: 'Assinatura expirada ou pendente. É necessário realizar o pagamento.',
+          paymentExpired: true,
+          token
+        });
+        return;
+      }
+    }
 
     res.json({
       success: true,
@@ -247,7 +267,9 @@ export const getProfile = async (req: AuthenticatedRequest, res: Response): Prom
             id: true,
             slug: true,
             name: true,
-            active: true
+            active: true,
+            paymentStatus: true,
+            expiresAt: true
           }
         }
       }
@@ -291,7 +313,8 @@ export const verifyToken = async (req: AuthenticatedRequest, res: Response): Pro
       success: true,
       message: 'Token válido',
       data: {
-        user: req.user
+        user: req.user,
+        tenant: req.tenant
       }
     });
   } catch (error) {

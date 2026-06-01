@@ -13,6 +13,8 @@ interface Tenant {
   name: string;
   domain?: string;
   active: boolean;
+  paymentStatus?: string;
+  expiresAt?: string | null;
   allowedProviders?: string[]; // ['WAHA', 'EVOLUTION', 'QUEPASA']
   createdAt: string;
   updatedAt: string;
@@ -142,6 +144,13 @@ interface Settings {
   iconUrl?: string;
   openaiApiKey?: string;
   groqApiKey?: string;
+  syncpayClientId?: string;
+  syncpayClientSecret?: string;
+  monthlyPrice?: number;
+  defaultQuotaUsers?: number;
+  defaultQuotaContacts?: number;
+  defaultQuotaCampaigns?: number;
+  defaultQuotaConnections?: number;
 }
 
 const settingsSchema = z.object({
@@ -173,12 +182,24 @@ const generalSettingsSchema = z.object({
   }),
 });
 
+const financeSettingsSchema = z.object({
+  syncpayClientId: z.string().optional(),
+  syncpayClientSecret: z.string().optional(),
+  monthlyPrice: z.coerce.number().min(0).optional(),
+  defaultQuotaUsers: z.coerce.number().min(1).optional(),
+  defaultQuotaContacts: z.coerce.number().min(1).optional(),
+  defaultQuotaCampaigns: z.coerce.number().min(1).optional(),
+  defaultQuotaConnections: z.coerce.number().min(1).optional(),
+  defaultAllowedProviders: z.array(z.string()).default(['WAHA', 'EVOLUTION', 'QUEPASA']),
+});
+
 type SettingsFormData = z.infer<typeof settingsSchema>;
 type GeneralSettingsFormData = z.infer<typeof generalSettingsSchema>;
+type FinanceSettingsFormData = z.infer<typeof financeSettingsSchema>;
 
 
 export function SuperAdminManagerPage() {
-  const [activeTab, setActiveTab] = useState<'general' | 'appearance' | 'integrations' | 'tenants' | 'users' | 'backup'>('general');
+  const [activeTab, setActiveTab] = useState<'general' | 'appearance' | 'integrations' | 'tenants' | 'users' | 'backup' | 'finance'>('general');
   const [tenants, setTenants] = useState<Tenant[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [stats, setStats] = useState<SystemStats | null>(null);
@@ -239,7 +260,7 @@ export function SuperAdminManagerPage() {
 
   useEffect(() => {
     loadData();
-    if (activeTab === 'integrations') {
+    if (activeTab === 'integrations' || activeTab === 'finance') {
       loadIntegrationSettings();
     }
     if (activeTab === 'general' || activeTab === 'appearance') {
@@ -264,6 +285,17 @@ export function SuperAdminManagerPage() {
     formState: { errors: generalErrors, isSubmitting: isGeneralSubmitting },
   } = useForm<GeneralSettingsFormData>({
     resolver: zodResolver(generalSettingsSchema),
+  });
+
+  // Finance settings form
+  const {
+    register: registerFinance,
+    handleSubmit: handleFinanceSubmit,
+    setValue: setFinanceValue,
+    watch: watchFinance,
+    formState: { errors: financeErrors, isSubmitting: isFinanceSubmitting },
+  } = useForm<FinanceSettingsFormData>({
+    resolver: zodResolver(financeSettingsSchema),
   });
 
   // Helper para fazer requisições autenticadas
@@ -349,6 +381,15 @@ export function SuperAdminManagerPage() {
         setValue('quepasaUrl', data.quepasaUrl || '');
         setValue('quepasaLogin', data.quepasaLogin || '');
         setValue('quepasaPassword', data.quepasaPassword || '');
+
+        setFinanceValue('syncpayClientId', data.syncpayClientId || '');
+        setFinanceValue('syncpayClientSecret', data.syncpayClientSecret || '');
+        setFinanceValue('monthlyPrice', data.monthlyPrice || 0);
+        setFinanceValue('defaultQuotaUsers', data.defaultQuotaUsers || 3);
+        setFinanceValue('defaultQuotaContacts', data.defaultQuotaContacts || 500);
+        setFinanceValue('defaultQuotaCampaigns', data.defaultQuotaCampaigns || 5);
+        setFinanceValue('defaultQuotaConnections', data.defaultQuotaConnections || 1);
+        setFinanceValue('defaultAllowedProviders', data.defaultAllowedProviders || ['WAHA', 'EVOLUTION', 'QUEPASA']);
       }
     } catch (error) {
       console.error('Erro ao carregar configurações de integração:', error);
@@ -373,6 +414,26 @@ export function SuperAdminManagerPage() {
     } catch (error) {
       console.error('Erro ao salvar configurações de integração:', error);
       toast.error('Erro ao salvar configurações');
+    }
+  };
+
+  const onFinanceSubmit = async (data: FinanceSettingsFormData) => {
+    try {
+      const response = await authenticatedFetch('/api/settings', {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      });
+
+      if (response.ok) {
+        toast.success('Configurações financeiras salvas com sucesso');
+        loadIntegrationSettings();
+      } else {
+        const errorData = await response.json();
+        toast.error(errorData.error || 'Erro ao salvar configurações financeiras');
+      }
+    } catch (error) {
+      console.error('Erro ao salvar configurações financeiras:', error);
+      toast.error('Erro ao salvar configurações financeiras');
     }
   };
 
@@ -1085,8 +1146,141 @@ export function SuperAdminManagerPage() {
           >
             💾 Backup
           </button>
+          <button
+            onClick={() => setActiveTab('finance')}
+            className={`py-2 px-1 border-b-2 font-medium text-sm ${
+              activeTab === 'finance'
+                ? 'border-blue-500 text-blue-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+            }`}
+          >
+            💰 Financeiro / Planos
+          </button>
         </nav>
       </div>
+
+      {/* Financeiro Tab */}
+      {activeTab === 'finance' && (
+        <div className="bg-white rounded-lg shadow p-6">
+          <h2 className="text-lg font-semibold text-gray-900 mb-6">Configurações Financeiras (SyncPay)</h2>
+          <form onSubmit={handleFinanceSubmit(onFinanceSubmit)} className="space-y-6 max-w-2xl">
+            <div className="space-y-4">
+              <h3 className="text-md font-medium text-gray-800 border-b pb-2">Credenciais SyncPay</h3>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Client ID</label>
+                <input
+                  type="text"
+                  {...registerFinance('syncpayClientId')}
+                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  placeholder="Seu Client ID SyncPay"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Client Secret</label>
+                <input
+                  type="password"
+                  {...registerFinance('syncpayClientSecret')}
+                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  placeholder="Seu Client Secret SyncPay"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-4 mt-8">
+              <h3 className="text-md font-medium text-gray-800 border-b pb-2">Plano Mensal</h3>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Valor da Mensalidade (R$)</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  {...registerFinance('monthlyPrice')}
+                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  placeholder="Ex: 99.90"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-4 mt-8">
+              <h3 className="text-md font-medium text-gray-800 border-b pb-2">Quotas Padrão (Novos Clientes)</h3>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Limite de Usuários</label>
+                  <input
+                    type="number"
+                    {...registerFinance('defaultQuotaUsers')}
+                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Limite de Contatos</label>
+                  <input
+                    type="number"
+                    {...registerFinance('defaultQuotaContacts')}
+                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Limite de Campanhas</label>
+                  <input
+                    type="number"
+                    {...registerFinance('defaultQuotaCampaigns')}
+                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Limite de Conexões</label>
+                  <input
+                    type="number"
+                    {...registerFinance('defaultQuotaConnections')}
+                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-4 mt-8">
+              <h3 className="text-md font-medium text-gray-800 border-b pb-2">
+                Provedores WhatsApp (Padrão para Novos Clientes)
+              </h3>
+              <p className="text-xs text-gray-500 mb-3">Selecione quais provedores a empresa poderá utilizar por padrão.</p>
+              <div className="space-y-2">
+                {['WAHA', 'EVOLUTION', 'QUEPASA'].map((provider) => {
+                  const currentProviders = watchFinance('defaultAllowedProviders') || [];
+                  return (
+                    <label key={provider} className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 cursor-pointer border border-gray-200 w-full">
+                      <input
+                        type="checkbox"
+                        checked={currentProviders.includes(provider)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setFinanceValue('defaultAllowedProviders', [...currentProviders, provider]);
+                          } else {
+                            setFinanceValue('defaultAllowedProviders', currentProviders.filter(p => p !== provider));
+                          }
+                        }}
+                        className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                      />
+                      <span className="text-sm font-medium text-gray-700">{provider}</span>
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="pt-5">
+              <div className="flex justify-end">
+                <button
+                  type="submit"
+                  disabled={isFinanceSubmitting}
+                  className="bg-blue-600 border border-transparent rounded-md shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                >
+                  {isFinanceSubmitting ? 'Salvando...' : 'Salvar Configurações'}
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      )}
 
       {/* Empresas Tab */}
       {activeTab === 'tenants' && (
@@ -1095,7 +1289,7 @@ export function SuperAdminManagerPage() {
             <h2 className="text-lg font-semibold text-gray-900">Gerenciar Empresas</h2>
             <button
               onClick={handleCreateTenant}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2"
+              className="btn-primary flex items-center gap-2"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -1116,13 +1310,39 @@ export function SuperAdminManagerPage() {
                         </p>
                       </div>
 
-                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                        tenant.active
-                          ? 'bg-green-100 text-green-800'
-                          : 'bg-red-100 text-red-800'
-                      }`}>
-                        {tenant.active ? 'Ativo' : 'Inativo'}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                          tenant.active
+                            ? 'bg-green-100 text-green-800'
+                            : 'bg-red-100 text-red-800'
+                        }`}>
+                          {tenant.active ? 'Ativo' : 'Inativo'}
+                        </span>
+                        
+                        {tenant.paymentStatus === 'ACTIVE' && (
+                          <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-emerald-100 text-emerald-800" title="Assinatura Ativa">
+                            💳 Pago
+                          </span>
+                        )}
+                        {tenant.paymentStatus === 'PENDING' && (
+                          <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800" title="Pagamento Pendente">
+                            ⏳ Pendente
+                          </span>
+                        )}
+                        {tenant.paymentStatus === 'EXPIRED' && (
+                          <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800" title="Assinatura Expirada">
+                            ❌ Expirado
+                          </span>
+                        )}
+                        {tenant.expiresAt && (
+                          <span className="text-xs text-gray-600 flex items-center gap-1 bg-gray-50 px-2 py-1 rounded-full border border-gray-200">
+                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            Vence em: {new Date(tenant.expiresAt).toLocaleDateString('pt-BR')}
+                          </span>
+                        )}
+                      </div>
                     </div>
 
                     {/* Usage Stats */}
@@ -1198,7 +1418,7 @@ export function SuperAdminManagerPage() {
             </div>
             <button
               onClick={handleCreateUser}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2"
+              className="btn-primary flex items-center gap-2"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -2033,7 +2253,7 @@ export function SuperAdminManagerPage() {
                   />
                   <button
                     onClick={removeLogo}
-                    className="px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700"
+                    className="btn-danger text-sm py-1 px-3"
                   >
                     Remover
                   </button>
@@ -2072,7 +2292,7 @@ export function SuperAdminManagerPage() {
                     <button
                       onClick={uploadLogo}
                       disabled={uploadingLogo}
-                      className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50"
+                      className="btn-primary"
                     >
                       {uploadingLogo ? 'Carregando...' : 'Carregar Logo'}
                     </button>

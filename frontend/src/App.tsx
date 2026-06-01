@@ -11,6 +11,8 @@ import { CampaignsPage } from './pages/CampaignsPage';
 import { InteractiveCampaignPage } from './pages/InteractiveCampaignPage';
 import { FlowBuilderPage } from './pages/FlowBuilderPage';
 import { SettingsPage } from './pages/SettingsPage';
+// Removed missing pages imports
+import { BillingPage } from './pages/BillingPage';
 import { LeadExtractorPage } from './pages/LeadExtractorPage';
 import { UsersPage } from './pages/UsersPage';
 import { LoginPage } from './pages/LoginPage';
@@ -18,6 +20,8 @@ import { SuperAdminPage } from './pages/SuperAdminPage';
 import { SuperAdminDashboard } from './pages/SuperAdminDashboard';
 import { SuperAdminManagerPage } from './pages/SuperAdminManagerPage';
 import { useGlobalSettings } from './hooks/useGlobalSettings';
+import { SignupPage } from './pages/SignupPage';
+import { RenewSubscriptionPage } from './pages/RenewSubscriptionPage';
 import './styles/globals.css';
 
 function AppContent() {
@@ -92,6 +96,8 @@ function AppContent() {
     return (
       <Routes>
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/signup" element={<SignupPage />} />
+        <Route path="/renew" element={<RenewSubscriptionPage />} />
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     );
@@ -129,6 +135,14 @@ function AppContent() {
               </ProtectedRoute>
             }
           />
+          {/* Route removed because MediaLibraryPage is missing */}
+          
+          {/* Nova Rota: Cobranças */}
+          <Route path="/cobrancas" element={
+            <ProtectedRoute>
+              <BillingPage />
+            </ProtectedRoute>
+          } />
           <Route
             path="/campanhas/interativa"
             element={

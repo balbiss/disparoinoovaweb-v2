@@ -132,7 +132,9 @@ export const getSettings = async (req: AuthenticatedRequest, res: Response) => {
       chatwootApiToken: tenantSettings?.chatwootApiToken || null,
       perfexUrl: tenantSettings?.perfexUrl || null,
       perfexToken: tenantSettings?.perfexToken || null,
-      apifyApiToken: tenantSettings?.apifyApiToken || null
+      apifyApiToken: tenantSettings?.apifyApiToken || null,
+      mpAccessToken: tenantSettings?.mpAccessToken || null,
+      mpPublicKey: tenantSettings?.mpPublicKey || null
     };
 
     res.json(combinedSettings);
@@ -167,7 +169,7 @@ export const updateSettings = async (req: AuthenticatedRequest, res: Response) =
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { wahaHost, wahaApiKey, evolutionHost, evolutionApiKey, quepasaUrl, quepasaLogin, quepasaPassword, companyName, pageTitle, openaiApiKey, groqApiKey, chatwootUrl, chatwootAccountId, chatwootApiToken, perfexUrl, perfexToken, apifyApiToken, tenantId } = req.body;
+    const { wahaHost, wahaApiKey, evolutionHost, evolutionApiKey, quepasaUrl, quepasaLogin, quepasaPassword, companyName, pageTitle, openaiApiKey, groqApiKey, chatwootUrl, chatwootAccountId, chatwootApiToken, perfexUrl, perfexToken, apifyApiToken, mpAccessToken, mpPublicKey, tenantId, syncpayClientId, syncpayClientSecret, monthlyPrice, defaultQuotaUsers, defaultQuotaContacts, defaultQuotaCampaigns, defaultQuotaConnections, defaultAllowedProviders } = req.body;
 
     // Atualizar configurações globais (WAHA, Evolution, Quepasa são globais)
     const globalSettings = await settingsService.updateSettings({
@@ -179,7 +181,15 @@ export const updateSettings = async (req: AuthenticatedRequest, res: Response) =
       quepasaLogin,
       quepasaPassword,
       companyName,
-      pageTitle
+      pageTitle,
+      syncpayClientId,
+      syncpayClientSecret,
+      monthlyPrice,
+      defaultQuotaUsers,
+      defaultQuotaContacts,
+      defaultQuotaCampaigns,
+      defaultQuotaConnections,
+      defaultAllowedProviders
     });
 
     // Para configurações AI e Chatwoot, usar tenantId do usuário, ou parâmetro tenantId para SUPERADMIN
@@ -189,9 +199,9 @@ export const updateSettings = async (req: AuthenticatedRequest, res: Response) =
       effectiveTenantId = tenantId || req.tenantId;
     }
 
-    // Atualizar configurações do tenant (APIs de IA, Chatwoot e Perfex)
+    // Atualizar configurações do tenant (APIs de IA, Chatwoot e Perfex e MP)
     let tenantSettings = null;
-    if (effectiveTenantId && (openaiApiKey !== undefined || groqApiKey !== undefined || chatwootUrl !== undefined || chatwootAccountId !== undefined || chatwootApiToken !== undefined || perfexUrl !== undefined || perfexToken !== undefined || apifyApiToken !== undefined)) {
+    if (effectiveTenantId && (openaiApiKey !== undefined || groqApiKey !== undefined || chatwootUrl !== undefined || chatwootAccountId !== undefined || chatwootApiToken !== undefined || perfexUrl !== undefined || perfexToken !== undefined || apifyApiToken !== undefined || mpAccessToken !== undefined || mpPublicKey !== undefined)) {
       tenantSettings = await tenantSettingsService.updateTenantSettings(effectiveTenantId, {
         openaiApiKey,
         groqApiKey,
@@ -200,7 +210,9 @@ export const updateSettings = async (req: AuthenticatedRequest, res: Response) =
         chatwootApiToken,
         perfexUrl,
         perfexToken,
-        apifyApiToken
+        apifyApiToken,
+        mpAccessToken,
+        mpPublicKey
       });
     }
 
@@ -214,7 +226,9 @@ export const updateSettings = async (req: AuthenticatedRequest, res: Response) =
       chatwootApiToken: tenantSettings?.chatwootApiToken || null,
       perfexUrl: tenantSettings?.perfexUrl || null,
       perfexToken: tenantSettings?.perfexToken || null,
-      apifyApiToken: tenantSettings?.apifyApiToken || null
+      apifyApiToken: tenantSettings?.apifyApiToken || null,
+      mpAccessToken: tenantSettings?.mpAccessToken || null,
+      mpPublicKey: tenantSettings?.mpPublicKey || null
     };
 
     res.json({

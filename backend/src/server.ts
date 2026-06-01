@@ -20,6 +20,8 @@ import userTenantsRoutes from './routes/userTenants';
 import backupRoutes from './routes/backup';
 import { systemRoutes } from './routes/system';
 import alertsRoutes from './routes/alerts';
+import mercadoPagoWebhookRoutes from './routes/mercadoPagoWebhookRoutes';
+import billingRoutes from './routes/billingRoutes';
 import analyticsRoutes from './routes/analytics';
 import notificationsRoutes from './routes/notifications';
 import messageTemplatesRoutes from './routes/messageTemplates';
@@ -33,10 +35,13 @@ import webhookRoutes from './routes/webhookRoutes';
 import incomingWebhookRoutes from './routes/incomingWebhookRoutes';
 import interactiveCampaignRoutes from './routes/interactiveCampaignRoutes';
 import httpProxyRoutes from './routes/httpProxyRoutes';
+import checkoutRoutes from './routes/checkoutRoutes';
+import syncpayWebhookRoutes from './routes/syncpayWebhookRoutes';
 // import integrationsRoutes from './routes/integrations';
 // import cacheRoutes from './routes/cache';
 import { authMiddleware } from './middleware/auth';
 import './services/campaignSchedulerService'; // Inicializar scheduler
+import { initializeRecurringChargeCron } from './services/recurringChargeCron'; // Inicializar recorrência
 import { initializeAlertsMonitoring } from './services/alertsMonitoringService'; // Inicializar monitoramento de alertas
 import { initializeBackupService } from './services/backupService'; // Inicializar serviço de backup
 import { websocketService } from './services/websocketService'; // Inicializar WebSocket
@@ -133,6 +138,9 @@ app.use((req, res, next) => {
 // Rotas públicas (autenticação) - rate limiting temporariamente desabilitado
 app.use('/api/auth', authRoutes);
 
+// Rota pública de checkout (assinatura)
+app.use('/api/checkout', checkoutRoutes);
+
 // Rota pública para configurações (favicon e título)
 app.use('/api/settings', settingsRoutes);
 
@@ -147,6 +155,8 @@ app.use('/api/uploads', express.static(path.join(process.cwd(), 'uploads')));
 // Rotas públicas de webhooks (recebem de provedores externos)
 app.use('/api/webhooks', webhookRoutes);
 app.use('/api/webhooks', incomingWebhookRoutes);
+app.use('/api/webhooks', syncpayWebhookRoutes);
+app.use('/api/webhooks/mercadopago', mercadoPagoWebhookRoutes);
 
 // Rotas protegidas (requerem autenticação)
 app.use('/api/contatos', authMiddleware, contactRoutes);
@@ -173,6 +183,7 @@ app.use('/api/perfex', authMiddleware, perfexRoutes); // Perfex CRM integration
 app.use('/api/media', authMiddleware, mediaRoutes); // Upload de arquivos de mídia
 app.use('/api/connections', authMiddleware, connectionRoutes); // Interactive campaigns - Connections
 app.use('/api/interactive-campaigns', authMiddleware, interactiveCampaignRoutes); // Interactive campaigns
+app.use('/api/billing', authMiddleware, billingRoutes); // Cobranças (Mercado Pago)
 app.use('/api/http-proxy', authMiddleware, httpProxyRoutes); // HTTP REST proxy to avoid CORS
 app.use('/api', authMiddleware, mockRoutes);
 
@@ -187,4 +198,7 @@ server.listen(PORT, () => {
 
   // Initialize backup service
   initializeBackupService();
+
+  // Initialize recurring charge cron
+  initializeRecurringChargeCron();
 });

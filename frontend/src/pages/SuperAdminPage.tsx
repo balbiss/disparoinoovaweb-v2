@@ -255,7 +255,7 @@ export function SuperAdminPage() {
         </div>
         <button
           onClick={() => setShowCreateModal(true)}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
+          className="btn-primary flex items-center gap-2"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -575,13 +575,13 @@ export function SuperAdminPage() {
                   setShowCreateModal(false);
                   resetForm();
                 }}
-                className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200"
+                className="btn-secondary"
               >
                 Cancelar
               </button>
               <button
                 onClick={handleCreateTenant}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                className="btn-primary"
               >
                 Criar Tenant
               </button>
@@ -706,13 +706,13 @@ export function SuperAdminPage() {
                   setSelectedTenant(null);
                   resetForm();
                 }}
-                className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200"
+                className="btn-secondary"
               >
                 Cancelar
               </button>
               <button
                 onClick={handleUpdateTenant}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                className="btn-primary"
               >
                 Salvar Alterações
               </button>

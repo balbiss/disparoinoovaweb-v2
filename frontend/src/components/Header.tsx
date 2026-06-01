@@ -10,7 +10,7 @@ interface HeaderProps {
 
 export function Header({ title, subtitle, actions }: HeaderProps) {
   const { settings, loading } = useSettings();
-  const { user } = useAuth();
+  const { user, tenant } = useAuth();
 
   const getUserRoleText = (role: string) => {
     switch (role) {
@@ -42,6 +42,15 @@ export function Header({ title, subtitle, actions }: HeaderProps) {
         <div className="flex items-center space-x-4">
           {/* Tenant Selector */}
           <TenantSelector />
+
+          {/* Expiration Badge */}
+          {tenant && tenant.expiresAt && (
+            <div className="hidden sm:flex items-center bg-green-50 px-3 py-1.5 rounded-md border border-green-200" title="Data de vencimento da assinatura">
+              <span className="text-xs font-medium text-green-700">
+                Vence em: {new Date(tenant.expiresAt).toLocaleDateString('pt-BR')}
+              </span>
+            </div>
+          )}
 
           {/* Avatar do usuário */}
           <div className="flex items-center space-x-3">

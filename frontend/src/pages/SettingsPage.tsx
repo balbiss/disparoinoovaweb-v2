@@ -17,6 +17,8 @@ interface Settings {
   perfexUrl?: string;
   perfexToken?: string;
   apifyApiToken?: string;
+  mpAccessToken?: string;
+  mpPublicKey?: string;
 }
 
 const settingsSchema = z.object({
@@ -28,6 +30,8 @@ const settingsSchema = z.object({
   perfexUrl: z.string().optional(),
   perfexToken: z.string().optional(),
   apifyApiToken: z.string().optional(),
+  mpAccessToken: z.string().optional(),
+  mpPublicKey: z.string().optional(),
 });
 
 type SettingsFormData = z.infer<typeof settingsSchema>;
@@ -35,7 +39,7 @@ type SettingsFormData = z.infer<typeof settingsSchema>;
 export function SettingsPage() {
   const [settings, setSettings] = useState<Settings | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeModal, setActiveModal] = useState<'openai' | 'groq' | 'chatwoot' | 'perfex' | 'apify' | null>(null);
+  const [activeModal, setActiveModal] = useState<'openai' | 'groq' | 'chatwoot' | 'perfex' | 'apify' | 'mercadopago' | null>(null);
   const { user } = useAuth();
 
   // Helper para fazer requisições autenticadas
@@ -106,6 +110,8 @@ export function SettingsPage() {
         setValue('perfexUrl', data.perfexUrl || '');
         setValue('perfexToken', data.perfexToken || '');
         setValue('apifyApiToken', data.apifyApiToken || '');
+        setValue('mpAccessToken', data.mpAccessToken || '');
+        setValue('mpPublicKey', data.mpPublicKey || '');
       }
     } catch (error) {
       console.error('Erro ao carregar configurações:', error);
@@ -146,13 +152,14 @@ export function SettingsPage() {
     }
   };
 
-  const removeIntegration = async (type: 'openai' | 'groq' | 'chatwoot' | 'perfex' | 'apify') => {
+  const removeIntegration = async (type: 'openai' | 'groq' | 'chatwoot' | 'perfex' | 'apify' | 'mercadopago') => {
     const integrationNames = {
       openai: 'OpenAI',
       groq: 'Groq',
       chatwoot: 'Chatwoot',
       perfex: 'Perfex CRM',
-      apify: 'Apify'
+      apify: 'Apify',
+      mercadopago: 'Mercado Pago'
     };
 
     if (!confirm(`Tem certeza que deseja remover a integração com ${integrationNames[type]}?`)) {
@@ -175,6 +182,9 @@ export function SettingsPage() {
         requestData.perfexToken = '';
       } else if (type === 'apify') {
         requestData.apifyApiToken = '';
+      } else if (type === 'mercadopago') {
+        requestData.mpAccessToken = '';
+        requestData.mpPublicKey = '';
       }
 
       if (user?.role === 'SUPERADMIN') {
@@ -255,7 +265,7 @@ export function SettingsPage() {
                     </span>
                     <button
                       onClick={() => setActiveModal('openai')}
-                      className="px-3 py-1 bg-gray-800 text-white text-sm rounded hover:bg-gray-900"
+                      className="btn-primary py-1 px-3 text-sm"
                     >
                       Configurar
                     </button>
@@ -285,7 +295,7 @@ export function SettingsPage() {
                     </span>
                     <button
                       onClick={() => setActiveModal('groq')}
-                      className="px-3 py-1 bg-orange-600 text-white text-sm rounded hover:bg-orange-700"
+                      className="btn-primary py-1 px-3 text-sm"
                     >
                       Configurar
                     </button>
@@ -325,7 +335,7 @@ export function SettingsPage() {
                   </span>
                   <button
                     onClick={() => setActiveModal('chatwoot')}
-                    className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
+                    className="btn-primary py-1 px-3 text-sm"
                   >
                     Configurar
                   </button>
@@ -364,7 +374,7 @@ export function SettingsPage() {
                   </span>
                   <button
                     onClick={() => setActiveModal('perfex')}
-                    className="px-3 py-1 bg-purple-600 text-white text-sm rounded hover:bg-purple-700"
+                    className="btn-primary py-1 px-3 text-sm"
                   >
                     Configurar
                   </button>
@@ -403,7 +413,46 @@ export function SettingsPage() {
                   </span>
                   <button
                     onClick={() => setActiveModal('apify')}
-                    className="px-3 py-1 bg-teal-600 text-white text-sm rounded hover:bg-teal-700"
+                    className="btn-primary py-1 px-3 text-sm"
+                  >
+                    Configurar
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Integração Mercado Pago */}
+          <div className="bg-white rounded-lg shadow p-6 mt-6">
+            <h2 className="text-lg font-semibold mb-6 text-gray-900">
+              💳 Integração Mercado Pago
+            </h2>
+            <p className="text-gray-600 mb-6">
+              Configure as credenciais para emitir cobranças (PIX / Boleto) direto na sua conta
+            </p>
+
+            <div className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                    <span className="text-blue-600 font-semibold">💳</span>
+                  </div>
+                  <div>
+                    <h3 className="font-medium text-gray-900">Mercado Pago</h3>
+                    <p className="text-sm text-gray-500">Cobranças e Faturamento</p>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                    settings?.mpAccessToken
+                      ? 'bg-green-100 text-green-800'
+                      : 'bg-gray-100 text-gray-800'
+                  }`}>
+                    {settings?.mpAccessToken ? 'Configurado' : 'Não configurado'}
+                  </span>
+                  <button
+                    onClick={() => setActiveModal('mercadopago')}
+                    className="btn-primary py-1 px-3 text-sm"
                   >
                     Configurar
                   </button>
@@ -442,7 +491,7 @@ export function SettingsPage() {
                   type="password"
                   {...register('openaiApiKey')}
                   placeholder="sk-..."
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="input-field py-2"
                 />
                 {errors.openaiApiKey && (
                   <p className="text-red-500 text-sm mt-1">
@@ -458,7 +507,7 @@ export function SettingsPage() {
                 <button
                   type="button"
                   onClick={() => setActiveModal(null)}
-                  className="flex-1 px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
+                  className="btn-secondary flex-1 py-2"
                 >
                   Cancelar
                 </button>
@@ -467,7 +516,7 @@ export function SettingsPage() {
                     type="button"
                     onClick={() => removeIntegration('openai')}
                     disabled={isSubmitting}
-                    className="flex-1 px-4 py-2 text-white bg-red-600 rounded-md hover:bg-red-700 disabled:opacity-50"
+                    className="btn-danger flex-1 py-2"
                   >
                     Remover
                   </button>
@@ -475,7 +524,7 @@ export function SettingsPage() {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="flex-1 px-4 py-2 bg-gray-800 text-white rounded-md hover:bg-gray-900 disabled:opacity-50"
+                  className="btn-primary flex-1 py-2"
                 >
                   {isSubmitting ? 'Salvando...' : 'Salvar'}
                 </button>
@@ -509,7 +558,7 @@ export function SettingsPage() {
                   type="password"
                   {...register('groqApiKey')}
                   placeholder="gsk_..."
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="input-field py-2"
                 />
                 {errors.groqApiKey && (
                   <p className="text-red-500 text-sm mt-1">
@@ -525,7 +574,7 @@ export function SettingsPage() {
                 <button
                   type="button"
                   onClick={() => setActiveModal(null)}
-                  className="flex-1 px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
+                  className="btn-secondary flex-1 py-2"
                 >
                   Cancelar
                 </button>
@@ -534,7 +583,7 @@ export function SettingsPage() {
                     type="button"
                     onClick={() => removeIntegration('groq')}
                     disabled={isSubmitting}
-                    className="flex-1 px-4 py-2 text-white bg-red-600 rounded-md hover:bg-red-700 disabled:opacity-50"
+                    className="btn-danger flex-1 py-2"
                   >
                     Remover
                   </button>
@@ -542,7 +591,7 @@ export function SettingsPage() {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="flex-1 px-4 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700 disabled:opacity-50"
+                  className="btn-primary flex-1 py-2"
                 >
                   {isSubmitting ? 'Salvando...' : 'Salvar'}
                 </button>
@@ -576,7 +625,7 @@ export function SettingsPage() {
                   type="url"
                   {...register('chatwootUrl')}
                   placeholder="https://app.chatwoot.com"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="input-field py-2"
                 />
                 {errors.chatwootUrl && (
                   <p className="text-red-500 text-sm mt-1">
@@ -597,7 +646,7 @@ export function SettingsPage() {
                   type="text"
                   {...register('chatwootAccountId')}
                   placeholder="123456"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="input-field py-2"
                 />
                 {errors.chatwootAccountId && (
                   <p className="text-red-500 text-sm mt-1">
@@ -618,7 +667,7 @@ export function SettingsPage() {
                   type="password"
                   {...register('chatwootApiToken')}
                   placeholder="••••••••••••••••"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="input-field py-2"
                 />
                 {errors.chatwootApiToken && (
                   <p className="text-red-500 text-sm mt-1">
@@ -634,7 +683,7 @@ export function SettingsPage() {
                 <button
                   type="button"
                   onClick={() => setActiveModal(null)}
-                  className="flex-1 px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
+                  className="btn-secondary flex-1 py-2"
                 >
                   Cancelar
                 </button>
@@ -643,7 +692,7 @@ export function SettingsPage() {
                     type="button"
                     onClick={() => removeIntegration('chatwoot')}
                     disabled={isSubmitting}
-                    className="flex-1 px-4 py-2 text-white bg-red-600 rounded-md hover:bg-red-700 disabled:opacity-50"
+                    className="btn-danger flex-1 py-2"
                   >
                     Remover
                   </button>
@@ -651,7 +700,7 @@ export function SettingsPage() {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+                  className="btn-primary flex-1 py-2"
                 >
                   {isSubmitting ? 'Salvando...' : 'Salvar'}
                 </button>
@@ -724,7 +773,7 @@ export function SettingsPage() {
                   type="password"
                   {...register('apifyApiToken')}
                   placeholder="apify_api_..."
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="input-field py-2"
                 />
                 {errors.apifyApiToken && (
                   <p className="text-red-500 text-sm mt-1">
@@ -740,7 +789,7 @@ export function SettingsPage() {
                 <button
                   type="button"
                   onClick={() => setActiveModal(null)}
-                  className="flex-1 px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
+                  className="btn-secondary flex-1 py-2"
                 >
                   Cancelar
                 </button>
@@ -749,7 +798,7 @@ export function SettingsPage() {
                     type="button"
                     onClick={() => removeIntegration('apify')}
                     disabled={isSubmitting}
-                    className="flex-1 px-4 py-2 text-white bg-red-600 rounded-md hover:bg-red-700 disabled:opacity-50"
+                    className="btn-danger flex-1 py-2"
                   >
                     Remover
                   </button>
@@ -757,7 +806,103 @@ export function SettingsPage() {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="flex-1 px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 disabled:opacity-50"
+                  className="btn-primary flex-1 py-2"
+                >
+                  {isSubmitting ? 'Salvando...' : 'Salvar'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Mercado Pago */}
+      {activeModal === 'mercadopago' && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">💳 Configurar Mercado Pago</h3>
+              <button
+                onClick={() => setActiveModal(null)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+              <div>
+                <label htmlFor="mpAccessToken" className="block text-sm font-medium text-gray-700 mb-1">
+                  Access Token (Produção)
+                </label>
+                <input
+                  id="mpAccessToken"
+                  type="password"
+                  {...register('mpAccessToken')}
+                  placeholder="APP_USR-..."
+                  className="input-field py-2"
+                />
+                {errors.mpAccessToken && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {errors.mpAccessToken.message}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <label htmlFor="mpPublicKey" className="block text-sm font-medium text-gray-700 mb-1">
+                  Public Key (Produção)
+                </label>
+                <input
+                  id="mpPublicKey"
+                  type="text"
+                  {...register('mpPublicKey')}
+                  placeholder="APP_USR-..."
+                  className="input-field py-2"
+                />
+                {errors.mpPublicKey && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {errors.mpPublicKey.message}
+                  </p>
+                )}
+              </div>
+
+              {settings?.mpAccessToken && (
+                <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                  <h4 className="font-semibold text-blue-900 mb-2">Sua URL de Webhook:</h4>
+                  <p className="text-xs text-blue-800 mb-2">
+                    Copie a URL abaixo e cole nas configurações de Notificações Webhook do seu painel do Mercado Pago:
+                  </p>
+                  <div className="flex gap-2 items-center">
+                    <code className="text-xs bg-white px-2 py-1 rounded border flex-1 break-all select-all">
+                      {window.location.origin}/api/webhooks/mercadopago/billing/{user?.tenant?.slug || 'sua-empresa'}
+                    </code>
+                  </div>
+                </div>
+              )}
+
+              <div className="flex gap-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => setActiveModal(null)}
+                  className="btn-secondary flex-1 py-2"
+                >
+                  Cancelar
+                </button>
+                {settings?.mpAccessToken && (
+                  <button
+                    type="button"
+                    onClick={() => removeIntegration('mercadopago')}
+                    disabled={isSubmitting}
+                    className="btn-danger flex-1 py-2"
+                  >
+                    Remover
+                  </button>
+                )}
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="btn-primary flex-1 py-2"
                 >
                   {isSubmitting ? 'Salvando...' : 'Salvar'}
                 </button>

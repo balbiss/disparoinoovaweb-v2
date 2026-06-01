@@ -49,11 +49,11 @@ export function TenantSelector() {
   const loadAllTenants = async () => {
     try {
       setLoadingSuperAdmin(true);
-      // Buscar apenas tenants associados ao usuário (mesmo para SUPERADMIN)
-      const response = await authenticatedFetch('/api/user-tenants');
+      const response = await authenticatedFetch('/api/tenants');
       if (response.ok) {
         const data = await response.json();
-        const tenantsArray = data.tenants || [];
+        // Filtrar apenas empresas ativas para o dropdown
+        const tenantsArray = (data.tenants || []).filter((t: SuperAdminTenant) => t.active);
         setAllTenants(tenantsArray);
 
         // Load from localStorage or select first

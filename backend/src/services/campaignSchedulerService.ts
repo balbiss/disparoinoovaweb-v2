@@ -294,10 +294,16 @@ class CampaignSchedulerService {
       const contactsResponse = await ContactService.getContacts();
       const contact = contactsResponse.contacts.find((c: any) => c.id === message.contactId);
 
+      // Buscar cobrança pendente para variáveis de cobrança
+      const billingCharge = await prisma.billingCharge.findFirst({
+        where: { contactId: message.contactId, status: 'PENDING' },
+        orderBy: { dueDate: 'asc' }
+      });
+
       console.log(`🔍 CONTACT FOUND:`, contact);
 
       // Depois aplicar variáveis dinâmicas se houver contato
-      const processedContent = contact ? this.processVariables(contentWithSelectedVariation, contact) : contentWithSelectedVariation;
+      const processedContent = contact ? this.processVariables(contentWithSelectedVariation, contact, billingCharge) : contentWithSelectedVariation;
 
       console.log(`🔍 PROCESSED CONTENT:`, processedContent);
 
@@ -390,6 +396,13 @@ class CampaignSchedulerService {
           }
         });
 
+        if (billingCharge) {
+          await prisma.billingCharge.update({
+            where: { id: billingCharge.id },
+            data: { sentAt: new Date() }
+          });
+        }
+
         // Atualizar contador da campanha
         await prisma.campaign.update({
           where: { id: campaign.id },
@@ -445,7 +458,7 @@ class CampaignSchedulerService {
     }
   }
 
-  private processVariables(content: any, contact: any): any {
+  private processVariables(content: any, contact: any, billingCharge?: any): any {
     console.log(`🔧 PROCESSING VARIABLES for contact:`, contact);
 
     const replaceVariables = (text: string): string => {
@@ -460,6 +473,20 @@ class CampaignSchedulerService {
       result = result.replace(/\{\{email\}\}/g, contact.email || '');
       result = result.replace(/\{\{observacoes\}\}/g, contact.observacoes || '');
       result = result.replace(/\{\{categoria\}\}/g, ''); // Por enquanto vazio
+
+      // Variáveis de cobrança (Mercado Pago)
+      if (billingCharge) {
+        const valorFormatado = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(billingCharge.amount);
+        const vencimentoFormatado = new Date(billingCharge.dueDate).toLocaleDateString('pt-BR');
+        
+        result = result.replace(/\{\{valor\}\}/g, valorFormatado);
+        result = result.replace(/\{\{vencimento\}\}/g, vencimentoFormatado);
+        result = result.replace(/\{\{link_pagamento\}\}/g, billingCharge.boletoUrl || '');
+      } else {
+        result = result.replace(/\{\{valor\}\}/g, '');
+        result = result.replace(/\{\{vencimento\}\}/g, '');
+        result = result.replace(/\{\{link_pagamento\}\}/g, '');
+      }
 
       console.log(`🔧 Processed text:`, result);
 

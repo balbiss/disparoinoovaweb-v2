@@ -17,6 +17,8 @@ model Tenant {
   slug             String   @unique // URL-friendly identifier
   name             String
   active           Boolean  @default(true)
+  paymentStatus    String   @default("ACTIVE") @map("payment_status") // PENDING, ACTIVE, EXPIRED
+  expiresAt        DateTime? @map("expires_at")
   allowedProviders String[] @default(["WAHA", "EVOLUTION", "QUEPASA"]) @map("allowed_providers") // Provedores WhatsApp permitidos
   createdAt        DateTime @default(now()) @map("created_at")
   updatedAt        DateTime @updatedAt @map("updated_at")
@@ -39,6 +41,9 @@ model Tenant {
   connections                  Connection[]
   interactiveCampaigns         InteractiveCampaign[]
   interactiveCampaignSessions  InteractiveCampaignSession[]
+  paymentTransactions          PaymentTransaction[]
+  billingCharges               BillingCharge[]
+  recurringCharges             RecurringCharge[]
 
   @@map("tenants")
 }
@@ -71,6 +76,8 @@ model TenantSettings {
   chatwootApiToken   String?  @map("chatwoot_api_token")
   perfexUrl          String?  @map("perfex_url")
   perfexToken        String?  @map("perfex_token")
+  mpAccessToken      String?  @map("mp_access_token")
+  mpPublicKey        String?  @map("mp_public_key")
   createdAt          DateTime @default(now()) @map("created_at")
   updatedAt          DateTime @updatedAt @map("updated_at")
 
@@ -115,10 +122,85 @@ model GlobalSettings {
   companyName     String?  @map("company_name")
   pageTitle       String?  @map("page_title")
   primaryColor    String?  @map("primary_color")
+  syncpayClientId String?  @map("syncpay_client_id")
+  syncpayClientSecret String? @map("syncpay_client_secret")
+  monthlyPrice    Float    @default(0) @map("monthly_price")
+  defaultQuotaUsers Int    @default(3) @map("default_quota_users")
+  defaultQuotaContacts Int @default(500) @map("default_quota_contacts")
+  defaultQuotaCampaigns Int @default(5) @map("default_quota_campaigns")
+  defaultQuotaConnections Int @default(1) @map("default_quota_connections")
+  defaultAllowedProviders String[] @default(["WAHA", "EVOLUTION", "QUEPASA"]) @map("default_allowed_providers")
   createdAt       DateTime @default(now()) @map("created_at")
   updatedAt       DateTime @updatedAt @map("updated_at")
 
   @@map("global_settings")
+}
+
+model PaymentTransaction {
+  id                String   @id @default(uuid())
+  tenantId          String   @map("tenant_id")
+  syncpayIdentifier String?  @unique @map("syncpay_identifier") // External ID from SyncPay
+  amount            Float
+  status            String   @default("PENDING") // PENDING, PAID, EXPIRED, CANCELLED
+  qrCode            String?  @db.Text @map("qr_code")
+  qrCodeCopy        String?  @db.Text @map("qr_code_copy")
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([syncpayIdentifier])
+  @@map("payment_transactions")
+}
+
+model BillingCharge {
+  id                 String   @id @default(uuid())
+  tenantId           String   @map("tenant_id")
+  contactId          String   @map("contact_id")
+  amount             Decimal
+  dueDate            DateTime @map("due_date")
+  status             String   @default("PENDING") // PENDING, PAID, EXPIRED, CANCELLED
+  pixCopiaCola       String?  @map("pix_copia_cola")
+  pixQrCodeBase64    String?  @map("pix_qr_code_base64")
+  boletoUrl          String?  @map("boleto_url")
+  mercadoPagoId      String?  @map("mercado_pago_id")
+  sentAt             DateTime? @map("sent_at")
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  tenant  Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  contact Contact @relation(fields: [contactId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([contactId])
+  @@map("billing_charges")
+}
+
+model RecurringCharge {
+  id                 String   @id @default(uuid())
+  tenantId           String   @map("tenant_id")
+  contactId          String?  @map("contact_id") // Optional se for por categoria
+  categoryId         String?  @map("category_id")
+  amount             Decimal
+  dayOfMonth         Int      @map("day_of_month") // Dia de vencimento (1 a 31)
+  description        String?
+  active             Boolean  @default(true)
+  lastGeneratedAt    DateTime? @map("last_generated_at")
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  tenant   Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  contact  Contact?  @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  category Category? @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([contactId])
+  @@index([categoryId])
+  @@map("recurring_charges")
 }
 
 // ============================================================================
@@ -142,6 +224,8 @@ model Contact {
   categoria                   Category?                    @relation(fields: [categoriaId], references: [id], onDelete: SetNull)
   tenant                      Tenant?                      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   interactiveCampaignSessions InteractiveCampaignSession[]
+  billingCharges              BillingCharge[]
+  recurringCharges            RecurringCharge[]
 
   @@index([tenantId])
   @@index([categoriaId])
@@ -159,8 +243,9 @@ model Category {
   atualizadoEm DateTime @updatedAt @map("atualizado_em")
 
   // Relations
-  contacts    Contact[]
-  tenant      Tenant?  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  contacts         Contact[]
+  tenant           Tenant?  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  recurringCharges RecurringCharge[]
 
   @@index([tenantId])
   @@map("categories")

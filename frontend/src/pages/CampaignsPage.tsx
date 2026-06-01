@@ -131,6 +131,8 @@ export function CampaignsPage() {
         throw new Error(`HTTP ${response.status}`);
       }
       const tags = await response.json();
+      // Adicionar opção virtual de Cobranças Pendentes
+      tags.unshift({ id: 'BILLING_PENDING', nome: '💳 Cobranças Pendentes' });
       setContactTags(tags);
     } catch (error) {
       console.error('Erro ao carregar tags:', error);
@@ -762,7 +764,7 @@ export function CampaignsPage() {
                     <div className="flex gap-1 ml-4">
                       <button
                         onClick={() => handleViewReport(campaign.id)}
-                        className="px-2 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700"
+                        className="btn-primary py-1 px-2 text-xs"
                         title="Ver relatório da campanha"
                       >
                         <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
@@ -1039,6 +1041,9 @@ export function CampaignsPage() {
                                 <code className="bg-blue-100 px-1 rounded mx-1">{'{{email}}'}</code>
                                 <code className="bg-blue-100 px-1 rounded mx-1">{'{{categoria}}'}</code>
                                 <code className="bg-blue-100 px-1 rounded mx-1">{'{{observacoes}}'}</code>
+                                <code className="bg-blue-100 px-1 rounded mx-1">{'{{valor}}'}</code>
+                                <code className="bg-blue-100 px-1 rounded mx-1">{'{{vencimento}}'}</code>
+                                <code className="bg-blue-100 px-1 rounded mx-1">{'{{link_pagamento}}'}</code>
                               </span>
                             </p>
                           </div>
@@ -1058,7 +1063,7 @@ export function CampaignsPage() {
                                 messageContent: { sequence: newSequence }
                               }));
                             }}
-                            className="px-3 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 flex items-center gap-2"
+                            className="btn-primary flex items-center gap-2 text-sm py-2 px-3"
                           >
                             <span className="text-lg">+</span>
                             Mensagem
@@ -1194,7 +1199,7 @@ export function CampaignsPage() {
                                           <div key={varIndex} className="flex gap-2">
                                             <div className="flex-1">
                                               <textarea
-                                                placeholder={`Variação ${varIndex + 1}... Use variáveis como {{nome}}, {{email}}, {{telefone}}, {{categoria}}, {{observacoes}}`}
+                                                placeholder={`Variação ${varIndex + 1}... Use variáveis como {{nome}}, {{valor}}, {{vencimento}}, {{link_pagamento}}`}
                                                 value={variation}
                                                 onChange={(e) => {
                                                   const currentSequence = ('sequence' in formData.messageContent) ? formData.messageContent.sequence : [];
@@ -1296,7 +1301,7 @@ export function CampaignsPage() {
 
                                     <div className="flex flex-wrap gap-1">
                                       <span className="text-xs text-gray-500">Variáveis disponíveis:</span>
-                                      {['{{nome}}', '{{email}}', '{{telefone}}', '{{categoria}}', '{{observacoes}}'].map((variable) => (
+                                      {['{{nome}}', '{{email}}', '{{telefone}}', '{{categoria}}', '{{observacoes}}', '{{valor}}', '{{vencimento}}', '{{link_pagamento}}'].map((variable) => (
                                         <button
                                           key={variable}
                                           type="button"
@@ -1460,7 +1465,7 @@ export function CampaignsPage() {
                                       />
                                       <div className="flex flex-wrap gap-1 mt-2">
                                         <span className="text-xs text-gray-500">Variáveis disponíveis:</span>
-                                        {['{{nome}}', '{{email}}', '{{telefone}}', '{{categoria}}', '{{observacoes}}'].map((variable) => (
+                                        {['{{nome}}', '{{email}}', '{{telefone}}', '{{categoria}}', '{{observacoes}}', '{{valor}}', '{{vencimento}}', '{{link_pagamento}}'].map((variable) => (
                                           <button
                                             key={variable}
                                             type="button"
@@ -1607,7 +1612,7 @@ export function CampaignsPage() {
                                       />
                                       <div className="flex flex-wrap gap-1 mt-2">
                                         <span className="text-xs text-gray-500">Variáveis disponíveis:</span>
-                                        {['{{nome}}', '{{email}}', '{{telefone}}', '{{categoria}}', '{{observacoes}}'].map((variable) => (
+                                        {['{{nome}}', '{{email}}', '{{telefone}}', '{{categoria}}', '{{observacoes}}', '{{valor}}', '{{vencimento}}', '{{link_pagamento}}'].map((variable) => (
                                           <button
                                             key={variable}
                                             type="button"
@@ -1677,8 +1682,8 @@ export function CampaignsPage() {
                                     </div>
 
                                     {item.content.useMediaVariations ? (
-                                      // Grid horizontal de 4 variações
-                                      <div className="grid grid-cols-4 gap-3">
+                                      // Grid horizontal de 4 variações (responsivo)
+                                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                                         {Array.from({ length: 4 }, (_, varIndex) => {
                                           const mediaVariations = item.content.mediaVariations || [];
                                           const variation = mediaVariations[varIndex] || { url: '', caption: '', fileName: '' };
@@ -2101,13 +2106,13 @@ export function CampaignsPage() {
                   <button
                     type="button"
                     onClick={() => setShowCreateModal(false)}
-                    className="w-full px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium"
+                    className="btn-secondary w-full py-3"
                   >
                     Cancelar
                   </button>
                   <button
                     type="submit"
-                    className="w-full px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all font-medium shadow-lg"
+                    className="btn-primary w-full py-3"
                   >
                     Criar Campanha
                   </button>
@@ -2219,7 +2224,7 @@ export function CampaignsPage() {
                     {Object.keys(reportData.messagesBySession).length > 0 && (
                       <div>
                         <h4 className="text-lg font-semibold text-gray-900 mb-3">Distribuição por Sessão</h4>
-                        <div className="bg-white border rounded-lg overflow-hidden">
+                        <div className="bg-white border rounded-lg overflow-x-auto">
                           <table className="min-w-full divide-y divide-gray-200">
                             <thead className="bg-gray-50">
                               <tr>
@@ -2257,7 +2262,7 @@ export function CampaignsPage() {
                         <h4 className="text-lg font-semibold text-gray-900">Detalhes das Mensagens</h4>
                         <button
                           onClick={handleDownloadReport}
-                          className="px-4 py-2 bg-green-600 text-white text-sm rounded-md hover:bg-green-700"
+                          className="btn-primary text-sm py-2 px-4"
                         >
                           📊 Download CSV
                         </button>
@@ -2272,7 +2277,7 @@ export function CampaignsPage() {
 
                         return (
                           <>
-                            <div className="bg-white border rounded-lg overflow-hidden overflow-visible">
+                            <div className="bg-white border rounded-lg overflow-x-auto overflow-visible">
                               <table className="min-w-full divide-y divide-gray-200">
                                 <thead className="bg-gray-50">
                                   <tr>

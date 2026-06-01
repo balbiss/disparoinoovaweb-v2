@@ -202,20 +202,40 @@ export const createCampaign = async (req: AuthenticatedRequest, res: Response) =
     const tenantId = req.tenantId;
 
     // Buscar contatos que pertencem às categorias selecionadas
-    const whereContacts: any = {
-      categoriaId: { in: targetTags },
-      tenantId: tenantId
-    };
+    let filteredContacts: any[] = [];
 
-    const filteredContacts = await prisma.contact.findMany({
-      where: whereContacts,
-      select: {
-        id: true,
-        nome: true,
-        telefone: true,
-        categoriaId: true
+    if (targetTags.includes('BILLING_PENDING')) {
+      const pendingCharges = await prisma.billingCharge.findMany({
+        where: { tenantId, status: 'PENDING' },
+        include: { contact: true }
+      });
+      // Apenas adicionar contatos válidos (evitar dupes pode ser bom, mas vamos permitir 1 por cobrança)
+      for (const charge of pendingCharges) {
+        if (charge.contact) {
+          filteredContacts.push({
+            id: charge.contact.id,
+            nome: charge.contact.nome,
+            telefone: charge.contact.telefone,
+            categoriaId: charge.contact.categoriaId
+          });
+        }
       }
-    });
+    } else {
+      const whereContacts: any = {
+        categoriaId: { in: targetTags },
+        tenantId: tenantId
+      };
+
+      filteredContacts = await prisma.contact.findMany({
+        where: whereContacts,
+        select: {
+          id: true,
+          nome: true,
+          telefone: true,
+          categoriaId: true
+        }
+      });
+    }
 
     console.log(`📊 Categorias selecionadas:`, targetTags);
     console.log(`📊 Contatos encontrados com essas categorias:`, filteredContacts.length);

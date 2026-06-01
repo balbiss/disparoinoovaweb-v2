@@ -591,7 +591,7 @@ export function WhatsAppConnectionsPage() {
                     {session.status === 'SCAN_QR_CODE' && (
                       <button
                         onClick={() => openQRModal(session.name)}
-                        className="px-3 py-1 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700"
+                        className="btn-primary py-1 px-3 text-sm"
                       >
                         Ver QR Code
                       </button>
@@ -924,14 +924,14 @@ export function WhatsAppConnectionsPage() {
 
             <div className="flex justify-end gap-3 p-6 border-t">
               <button
-                onClick={() => openQRModal(currentQRSession.name)}
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                onClick={createSession}
+                className="btn-primary py-2 px-4"
               >
                 Atualizar QR
               </button>
               <button
                 onClick={closeQRModal}
-                className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400"
+                className="btn-secondary py-2 px-4"
               >
                 Fechar
               </button>

@@ -18,6 +18,7 @@ export interface AuthenticatedRequest extends Request {
     slug: string;
     name: string;
     active: boolean;
+    expiresAt?: Date | null;
   };
 }
 
@@ -39,6 +40,7 @@ export const authMiddleware = async (
     const token = req.header('Authorization')?.replace('Bearer ', '');
 
     if (!token) {
+      console.log('❌ authMiddleware: 401 - Token não fornecido');
       res.status(401).json({
         success: false,
         message: 'Token de acesso não fornecido'
@@ -63,6 +65,7 @@ export const authMiddleware = async (
     });
 
     if (!user || !user.ativo) {
+      console.log('❌ authMiddleware: 401 - Usuário não encontrado ou inativo', { userId: decoded.userId });
       res.status(401).json({
         success: false,
         message: 'Usuário não encontrado ou inativo'
@@ -89,10 +92,10 @@ export const authMiddleware = async (
     }
 
     // Adicionar tenantId diretamente para fácil acesso
-    req.tenantId = effectiveTenantId;
+    req.tenantId = effectiveTenantId === 'all' ? undefined : effectiveTenantId;
 
     // Se não é SUPERADMIN ou tem tenantId definido, buscar dados do tenant
-    if (effectiveTenantId) {
+    if (effectiveTenantId && effectiveTenantId !== 'all') {
       const tenant = await prisma.tenant.findUnique({
         where: {
           id: effectiveTenantId,
@@ -107,19 +110,47 @@ export const authMiddleware = async (
       });
 
       if (!tenant) {
-        res.status(401).json({
-          success: false,
-          message: 'Tenant não encontrado ou inativo'
+        if (user.role === 'SUPERADMIN') {
+          console.log('⚠️ authMiddleware: X-Tenant-Id inválido ignorado para SUPERADMIN', { tenantId: effectiveTenantId });
+          req.tenantId = undefined;
+        } else {
+          console.log('❌ authMiddleware: 401 - Tenant não encontrado ou inativo', { tenantId: effectiveTenantId });
+          res.status(401).json({
+            success: false,
+            message: 'A conta da sua empresa foi suspensa. Por favor, entre em contato com nosso suporte.'
+          });
+          return;
+        }
+      } else {
+        const tenantFull = await prisma.tenant.findUnique({
+          where: { id: tenant.id },
+          select: { paymentStatus: true, expiresAt: true }
         });
-        return;
-      }
 
-      req.tenant = tenant;
+        if (tenantFull) {
+          const now = new Date();
+          const isExpired = tenantFull.paymentStatus === 'EXPIRED' || (tenantFull.expiresAt && new Date(tenantFull.expiresAt) < now) || tenantFull.paymentStatus === 'PENDING';
+          if (isExpired && !req.originalUrl.includes('/api/checkout/renew') && !req.originalUrl.includes('/api/checkout/status') && !req.originalUrl.includes('/api/auth/verify')) {
+             res.status(402).json({
+               success: false,
+               message: 'Assinatura expirada ou pendente. Redirecionando para pagamento.',
+               paymentExpired: true
+             });
+             return;
+          }
+        }
+
+        req.tenant = {
+          ...tenant,
+          expiresAt: tenantFull?.expiresAt || null
+        };
+      }
     }
 
     next();
   } catch (error) {
     if (error instanceof jwt.TokenExpiredError) {
+      console.log('❌ authMiddleware: 401 - Token expirado');
       res.status(401).json({
         success: false,
         message: 'Token expirado'
@@ -128,6 +159,7 @@ export const authMiddleware = async (
     }
 
     if (error instanceof jwt.JsonWebTokenError) {
+      console.log('❌ authMiddleware: 401 - Token inválido');
       res.status(401).json({
         success: false,
         message: 'Token inválido'
@@ -135,7 +167,11 @@ export const authMiddleware = async (
       return;
     }
 
-    console.error('Erro no middleware de autenticação:', error);
+    console.log('❌ authMiddleware: 401 - Erro de autenticação genérico', error);
+    res.status(401).json({
+      success: false,
+      message: 'Erro de autenticação'
+    });
     res.status(500).json({
       success: false,
       message: 'Erro interno do servidor'

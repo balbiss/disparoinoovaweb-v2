@@ -82,21 +82,23 @@ export function Navigation() {
         </svg>
       )
     },
-    ...(user?.role === 'SUPERADMIN' ? [{
-      path: '/super-admin',
-      label: 'Super Admin',
-      icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.031 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-        </svg>
-      )
-    }] : [])
+    ...(user?.role === 'SUPERADMIN' ? [
+      {
+        path: '/super-admin',
+        label: 'Super Admin',
+        icon: (
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.031 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+          </svg>
+        )
+      }
+    ] : [])
   ];
 
   return (
-    <nav className="sidebar-navigation w-20 shadow-lg flex flex-col" style={{ background: 'var(--sidebar-bg)' }}>
-      {/* Logo Original Destacada - Diretamente no fundo escuro */}
-      <div className="w-full flex items-center justify-center py-6 border-b border-white/10">
+    <nav className="sidebar-navigation w-20 shadow-lg" style={{ background: 'var(--sidebar-bg)', display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden' }}>
+      {/* Logo */}
+      <div className="w-full flex items-center justify-center py-6 border-b border-white/10" style={{ flexShrink: 0 }}>
         {loading ? (
           <div className="h-12 w-12 bg-white/10 animate-pulse rounded"></div>
         ) : (
@@ -104,14 +106,14 @@ export function Navigation() {
             src={settings?.logoUrl || '/assets/default-logo.png'}
             alt={settings?.companyName || 'Sistema'}
             className="w-16 h-auto object-contain drop-shadow-lg"
-            style={{ transform: 'scale(1.4)' }} // Aumenta o tamanho da logo
+            style={{ transform: 'scale(1.4)' }}
           />
         )}
       </div>
       
-      <div className="p-4 flex-1 mt-2">
-        {/* Menu Items */}
-        <ul className="space-y-3">
+      {/* Menu Items */}
+      <div className="p-3 mt-1" style={{ flex: '1 1 0', overflow: 'hidden' }}>
+        <ul className="space-y-1">
           {menuItems.map((item) => (
             <li key={item.path}>
               <Link
@@ -138,11 +140,11 @@ export function Navigation() {
         </ul>
       </div>
 
-      {/* Logout Button - Fixed to footer */}
-      <div className="p-4 relative z-50">
+      {/* Logout - sempre fixo no rodapé */}
+      <div className="p-4 border-t border-white/10" style={{ flexShrink: 0 }}>
         <button
           onClick={logout}
-          className="group relative flex items-center justify-center w-12 h-12 rounded-xl transition-all duration-200 text-white/70 hover:text-white hover:bg-red-500/20 mx-auto z-50"
+          className="group relative flex items-center justify-center w-12 h-12 rounded-xl transition-all duration-200 text-white/70 hover:text-white hover:bg-red-500/20 mx-auto"
           title="Sair"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

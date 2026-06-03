@@ -232,7 +232,7 @@ export function SettingsPage() {
       />
 
       <div className="p-6">
-        <div className="max-w-4xl mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
           <div className="bg-white rounded-lg shadow p-6">
             <h2 className="text-lg font-semibold mb-6 text-gray-900">
               🔗 Integrações de IA
@@ -242,13 +242,13 @@ export function SettingsPage() {
             </p>
 
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="flex flex-col gap-4">
               {/* OpenAI Button */}
               <div className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col 2xl:flex-row items-start 2xl:items-center justify-between gap-3">
                   <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                      <span className="text-green-600 font-semibold">🤖</span>
+                    <div className="w-10 h-10 bg-gray-50 rounded-lg flex items-center justify-center overflow-hidden border border-gray-100">
+                      <img src="https://www.google.com/s2/favicons?domain=openai.com&sz=128" alt="OpenAI" className="w-6 h-6 object-contain" />
                     </div>
                     <div>
                       <h3 className="font-medium text-gray-900">OpenAI</h3>
@@ -275,10 +275,10 @@ export function SettingsPage() {
 
               {/* Groq Button */}
               <div className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col 2xl:flex-row items-start 2xl:items-center justify-between gap-3">
                   <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
-                      <span className="text-orange-600 font-semibold">⚡</span>
+                    <div className="w-10 h-10 bg-gray-50 rounded-lg flex items-center justify-center overflow-hidden border border-gray-100">
+                      <img src="https://www.google.com/s2/favicons?domain=groq.com&sz=128" alt="Groq" className="w-6 h-6 object-contain rounded-sm" />
                     </div>
                     <div>
                       <h3 className="font-medium text-gray-900">Groq</h3>
@@ -306,7 +306,7 @@ export function SettingsPage() {
           </div>
 
           {/* Integração Chatwoot */}
-          <div className="bg-white rounded-lg shadow p-6 mt-6">
+          <div className="bg-white rounded-lg shadow p-6">
             <h2 className="text-lg font-semibold mb-6 text-gray-900">
               💬 Integração Chatwoot
             </h2>
@@ -317,8 +317,8 @@ export function SettingsPage() {
             <div className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                    <span className="text-blue-600 font-semibold">💬</span>
+                  <div className="w-10 h-10 bg-gray-50 rounded-lg flex items-center justify-center overflow-hidden border border-gray-100">
+                    <img src="https://www.google.com/s2/favicons?domain=chatwoot.com&sz=128" alt="Chatwoot" className="w-6 h-6 object-contain" />
                   </div>
                   <div>
                     <h3 className="font-medium text-gray-900">Chatwoot</h3>
@@ -345,7 +345,7 @@ export function SettingsPage() {
           </div>
 
           {/* Integração Perfex CRM */}
-          <div className="bg-white rounded-lg shadow p-6 mt-6">
+          <div className="bg-white rounded-lg shadow p-6">
             <h2 className="text-lg font-semibold mb-6 text-gray-900">
               🔧 Integração Perfex CRM
             </h2>
@@ -356,8 +356,8 @@ export function SettingsPage() {
             <div className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                    <span className="text-purple-600 font-semibold">🔧</span>
+                  <div className="w-10 h-10 bg-gray-50 rounded-lg flex items-center justify-center overflow-hidden border border-gray-100">
+                    <img src="https://www.google.com/s2/favicons?domain=perfexcrm.com&sz=128" alt="Perfex CRM" className="w-6 h-6 object-contain" />
                   </div>
                   <div>
                     <h3 className="font-medium text-gray-900">Perfex CRM</h3>
@@ -384,7 +384,7 @@ export function SettingsPage() {
           </div>
 
           {/* Integração Apify */}
-          <div className="bg-white rounded-lg shadow p-6 mt-6">
+          <div className="bg-white rounded-lg shadow p-6">
             <h2 className="text-lg font-semibold mb-6 text-gray-900">
               🗺️ Integração Apify
             </h2>
@@ -395,8 +395,8 @@ export function SettingsPage() {
             <div className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-teal-100 rounded-lg flex items-center justify-center">
-                    <span className="text-teal-600 font-semibold">🗺️</span>
+                  <div className="w-10 h-10 bg-gray-50 rounded-lg flex items-center justify-center overflow-hidden border border-gray-100">
+                    <img src="https://www.google.com/s2/favicons?domain=apify.com&sz=128" alt="Apify" className="w-6 h-6 object-contain" />
                   </div>
                   <div>
                     <h3 className="font-medium text-gray-900">Apify</h3>
@@ -423,7 +423,7 @@ export function SettingsPage() {
           </div>
 
           {/* Integração Mercado Pago */}
-          <div className="bg-white rounded-lg shadow p-6 mt-6">
+          <div className="bg-white rounded-lg shadow p-6">
             <h2 className="text-lg font-semibold mb-6 text-gray-900">
               💳 Integração Mercado Pago
             </h2>
@@ -434,8 +434,8 @@ export function SettingsPage() {
             <div className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                    <span className="text-blue-600 font-semibold">💳</span>
+                  <div className="w-10 h-10 bg-gray-50 rounded-lg flex items-center justify-center overflow-hidden border border-gray-100">
+                    <img src="https://www.google.com/s2/favicons?domain=mercadopago.com.br&sz=128" alt="Mercado Pago" className="w-7 h-7 object-contain" />
                   </div>
                   <div>
                     <h3 className="font-medium text-gray-900">Mercado Pago</h3>
@@ -453,6 +453,41 @@ export function SettingsPage() {
                   <button
                     onClick={() => setActiveModal('mercadopago')}
                     className="btn-primary py-1 px-3 text-sm"
+                  >
+                    Configurar
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Integração Asaas (Em Breve) */}
+          <div className="bg-white rounded-lg shadow p-6 opacity-80 cursor-not-allowed">
+            <h2 className="text-lg font-semibold mb-6 text-gray-900 flex items-center gap-2">
+              🏦 Integração Asaas
+              <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full font-medium ml-auto">
+                Em breve
+              </span>
+            </h2>
+            <p className="text-gray-600 mb-6">
+              Emissão de cobranças, links de pagamento e gestão financeira completa com o Asaas
+            </p>
+
+            <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+              <div className="flex items-center justify-between opacity-70">
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center overflow-hidden border border-gray-200">
+                    <img src="https://www.google.com/s2/favicons?domain=asaas.com&sz=128" alt="Asaas" className="w-6 h-6 object-contain" />
+                  </div>
+                  <div>
+                    <h3 className="font-medium text-gray-900">Asaas</h3>
+                    <p className="text-sm text-gray-500">Conta digital PJ</p>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <button
+                    disabled
+                    className="bg-gray-200 text-gray-500 py-1 px-3 text-sm rounded cursor-not-allowed font-medium"
                   >
                     Configurar
                   </button>

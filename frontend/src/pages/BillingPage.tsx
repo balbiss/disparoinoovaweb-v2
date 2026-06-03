@@ -275,15 +275,45 @@ export function BillingPage() {
     }
   };
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'PAID':
-        return <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full font-medium">Pago</span>;
-      case 'CANCELLED':
-        return <span className="px-2 py-1 bg-red-100 text-red-800 text-xs rounded-full font-medium">Cancelado</span>;
-      default:
-        return <span className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full font-medium">Pendente</span>;
+  const handleStatusChange = async (id: string, newStatus: string) => {
+    try {
+      const res = await authenticatedFetch(`/api/billing/${id}/status`, {
+        method: 'PATCH',
+        body: JSON.stringify({ status: newStatus })
+      });
+      if (res.ok) {
+        toast.success('Status atualizado com sucesso!');
+        loadData();
+      } else {
+        toast.error('Erro ao atualizar status');
+      }
+    } catch (error) {
+      console.error('Erro ao atualizar status:', error);
+      toast.error('Erro ao atualizar status');
     }
+  };
+
+  const getStatusDropdown = (charge: any) => {
+    const statusColors: any = {
+      PAID: 'bg-green-100 text-green-800',
+      CANCELLED: 'bg-red-100 text-red-800',
+      PENDING: 'bg-yellow-100 text-yellow-800',
+      EXPIRED: 'bg-orange-100 text-orange-800'
+    };
+
+    return (
+      <select
+        value={charge.status}
+        onChange={(e) => handleStatusChange(charge.id, e.target.value)}
+        className={`px-2 py-1 text-xs rounded-full font-medium border-0 cursor-pointer focus:ring-0 outline-none appearance-none ${statusColors[charge.status] || statusColors.PENDING}`}
+        style={{ textAlignLast: 'center' }}
+      >
+        <option value="PENDING" className="bg-white text-gray-900">Pendente</option>
+        <option value="PAID" className="bg-white text-gray-900">Pago</option>
+        <option value="CANCELLED" className="bg-white text-gray-900">Cancelado</option>
+        <option value="EXPIRED" className="bg-white text-gray-900">Expirado</option>
+      </select>
+    );
   };
 
   return (
@@ -386,7 +416,7 @@ export function BillingPage() {
                         {charge.dueDate.split('T')[0].split('-').reverse().join('/')}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        {getStatusBadge(charge.status)}
+                        {getStatusDropdown(charge)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-gray-500 text-sm">
                         {charge.sentAt ? new Date(charge.sentAt).toLocaleString('pt-BR') : 'Não enviado'}

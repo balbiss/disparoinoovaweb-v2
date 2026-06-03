@@ -189,19 +189,18 @@ export async function sendMessageViaQuepasa(
     console.log(`📤 Sending message via Quepasa to ${normalizedPhone} (usando token da sessão):`, content);
 
     // Preparar payload baseado no tipo de conteúdo
-    const payload: any = {};
+    let payload: any = {};
 
     // URL para mídia (imagem, vídeo, áudio, documento)
     // Suporta tanto formato { image: { url } } quanto { url }
     if (content.image?.url) {
-      // Força image/jpeg para todas as imagens
       payload.url = content.image.url;
       payload.mime = 'image/jpeg';
       payload.mimetype = 'image/jpeg';
-      if (content.caption) {
-        payload.text = content.caption;
+      if (content.image.caption || content.text || content.caption) {
+        payload.text = content.image.caption || content.text || content.caption;
       }
-      console.log(`🖼️ Sending image - URL: ${payload.url}, MIME: ${payload.mime} (forced jpeg), Caption: ${payload.text || 'none'}`);
+      console.log(`🖼️ Sending image - URL: ${payload.url}, MIME: ${payload.mimetype} (forced jpeg), Caption: ${payload.text || 'none'}`);
     } else if (content.video?.url) {
       const mimeType = detectMimeType(content.video.url);
       payload.url = content.video.url;

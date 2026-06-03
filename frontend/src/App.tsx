@@ -19,6 +19,7 @@ import { LoginPage } from './pages/LoginPage';
 import { SuperAdminPage } from './pages/SuperAdminPage';
 import { SuperAdminDashboard } from './pages/SuperAdminDashboard';
 import { SuperAdminManagerPage } from './pages/SuperAdminManagerPage';
+import { SuperAdminApiDocsPage } from './pages/SuperAdminApiDocsPage';
 import { useGlobalSettings } from './hooks/useGlobalSettings';
 import { SignupPage } from './pages/SignupPage';
 import { RenewSubscriptionPage } from './pages/RenewSubscriptionPage';
@@ -196,6 +197,14 @@ function AppContent() {
             element={
               <ProtectedRoute superAdminOnly={true}>
                 <SuperAdminPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/superadmin/api-docs"
+            element={
+              <ProtectedRoute superAdminOnly={true}>
+                <SuperAdminApiDocsPage />
               </ProtectedRoute>
             }
           />

@@ -183,7 +183,7 @@ export class SettingsService {
   async getQuepasaConfig() {
     const settings = await this.getSettings();
     return {
-      url: settings.quepasaUrl,
+      url: settings.quepasaUrl ? settings.quepasaUrl.replace(/\/+$/, '') : '',
       login: settings.quepasaLogin,
       password: settings.quepasaPassword
     };

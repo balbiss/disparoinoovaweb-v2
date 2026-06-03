@@ -623,7 +623,7 @@ export function WhatsAppConnectionsPage() {
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center backdrop-blur-sm" style={{ zIndex: 9999 }}>
             <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md border border-gray-100 m-4" role="dialog" aria-labelledby="create-session-title">
             <div className="text-center mb-8">
-              <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl mx-auto mb-4 flex items-center justify-center">
+              <div className="w-16 h-16 bg-gradient-to-br from-brand-primary to-brand-secondary rounded-2xl mx-auto mb-4 flex items-center justify-center">
                 <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                 </svg>
@@ -645,7 +645,7 @@ export function WhatsAppConnectionsPage() {
                   <button
                     type="button"
                     onClick={() => !isCreating && setProviderDropdownOpen(!providerDropdownOpen)}
-                    className="w-full px-4 py-3 pl-12 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm bg-white text-left flex items-center justify-between"
+                    className="w-full px-4 py-3 pl-12 border border-gray-300 rounded-xl focus:ring-2 focus:ring-brand-primary focus:border-transparent text-sm bg-white text-left flex items-center justify-between"
                     disabled={isCreating}
                   >
                     <span className="flex items-center gap-3">
@@ -738,7 +738,7 @@ export function WhatsAppConnectionsPage() {
                   value={newSessionName}
                   onChange={(e) => setNewSessionName(e.target.value)}
                   placeholder="Ex: vendas, suporte, atendimento"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-brand-primary focus:border-transparent text-sm"
                   disabled={isCreating}
                   autoFocus
                 />
@@ -767,8 +767,8 @@ export function WhatsAppConnectionsPage() {
                     type="button"
                     onClick={() => setInteractiveCampaignEnabled(!interactiveCampaignEnabled)}
                     disabled={isCreating}
-                    className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
-                      interactiveCampaignEnabled ? 'bg-blue-600' : 'bg-gray-300'
+                    className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-brand-primary focus:ring-offset-2 ${
+                      interactiveCampaignEnabled ? 'bg-brand-primary' : 'bg-gray-300'
                     } ${isCreating ? 'opacity-50 cursor-not-allowed' : ''}`}
                     role="switch"
                     aria-checked={interactiveCampaignEnabled}
@@ -803,7 +803,7 @@ export function WhatsAppConnectionsPage() {
                     setCreateSessionModalOpen(false);
                   }}
                   disabled={isCreating || !newSessionName.trim()}
-                  className="flex-1 bg-green-600 text-white py-3 px-6 rounded-xl hover:bg-green-700 font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  className="flex-1 bg-brand-primary text-white py-3 px-6 rounded-xl hover:bg-brand-primary/90 font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   {isCreating ? (
                     <>

@@ -131,6 +131,38 @@ export const deleteCharge = async (req: Request, res: Response) => {
   }
 };
 
+// Atualizar status da cobrança
+export const updateChargeStatus = async (req: Request, res: Response) => {
+  try {
+    const tenantId = (req as any).tenantId;
+    const { id } = req.params;
+    const { status } = req.body;
+
+    const validStatuses = ['PENDING', 'PAID', 'EXPIRED', 'CANCELLED'];
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({ error: 'Status inválido.' });
+    }
+
+    const charge = await prisma.billingCharge.findFirst({
+      where: { id, tenantId }
+    });
+
+    if (!charge) {
+      return res.status(404).json({ error: 'Cobrança não encontrada.' });
+    }
+
+    const updatedCharge = await prisma.billingCharge.update({
+      where: { id },
+      data: { status }
+    });
+
+    return res.json(updatedCharge);
+  } catch (error) {
+    console.error('Erro ao atualizar status da cobrança:', error);
+    return res.status(500).json({ error: 'Erro interno ao atualizar status.' });
+  }
+};
+
 // Deletar cobranças em massa
 export const bulkDeleteCharges = async (req: Request, res: Response) => {
   try {

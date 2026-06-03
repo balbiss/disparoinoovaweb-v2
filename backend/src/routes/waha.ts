@@ -126,6 +126,7 @@ router.get('/sessions', authMiddleware, async (req: AuthenticatedRequest, res: R
             const statusResponse = await fetch(`${quepasaConfig.url}/health`, {
               headers: {
                 'Accept': 'application/json',
+                'X-QUEPASA-USER': quepasaConfig.login,
                 'X-QUEPASA-TOKEN': sessionToken
               }
             });
@@ -238,7 +239,7 @@ router.get('/sessions', authMiddleware, async (req: AuthenticatedRequest, res: R
               } else if (statusLower.includes('starting') || statusLower.includes('qrcode')) {
                 mappedStatus = 'SCAN_QR_CODE';
                 console.log('⏳ Mapeado para SCAN_QR_CODE');
-              } else if (statusLower.includes('disconnected') || statusLower.includes('stopped')) {
+              } else if (statusLower.includes('disconnected') || statusLower.includes('stopped') || statusLower.includes('invalid token') || statusLower.includes('not found')) {
                 mappedStatus = 'STOPPED';
                 console.log('⏹️ Mapeado para STOPPED');
               } else {
@@ -698,7 +699,7 @@ router.post('/sessions/:sessionName/start', authMiddleware, async (req: Authenti
     res.json(result);
   } catch (error) {
     console.error('Erro ao iniciar sessão:', error);
-    res.status(500).json({ error: 'Erro ao iniciar sessão WhatsApp' });
+    res.status(500).json({ error: error instanceof Error ? error.message : 'Erro ao iniciar sessão WhatsApp' });
   }
 });
 
@@ -768,6 +769,13 @@ router.post('/sessions/:sessionName/restart', async (req, res) => {
         name: sessionName,
         status: 'SCAN_QR_CODE',
         provider: 'EVOLUTION'
+      });
+    } else if (sessionProvider === 'QUEPASA') {
+      result = { message: 'Sessão Quepasa pronta para ser reconectada' };
+      await WhatsAppSessionService.createOrUpdateSession({
+        name: sessionName,
+        status: 'STOPPED',
+        provider: 'QUEPASA'
       });
     } else {
       result = await WahaSyncService.restartSession(sessionName);

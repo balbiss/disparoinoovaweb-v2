@@ -467,25 +467,25 @@ class CampaignSchedulerService {
       console.log(`🔧 Original text:`, text);
 
       let result = text;
-      // Usar replace simples ao invés de regex
-      result = result.replace(/\{\{nome\}\}/g, contact.nome || '');
-      result = result.replace(/\{\{telefone\}\}/g, contact.telefone || '');
-      result = result.replace(/\{\{email\}\}/g, contact.email || '');
-      result = result.replace(/\{\{observacoes\}\}/g, contact.observacoes || '');
-      result = result.replace(/\{\{categoria\}\}/g, ''); // Por enquanto vazio
+      // Usar replace com regex case-insensitive e suportando vários formatos: {{nome}}, {nome}, [nome]
+      result = result.replace(/\{\{nome\}\}|\{nome\}|\[nome\]/gi, contact.nome || '');
+      result = result.replace(/\{\{telefone\}\}|\{telefone\}|\[telefone\]/gi, contact.telefone || '');
+      result = result.replace(/\{\{email\}\}|\{email\}|\[email\]/gi, contact.email || '');
+      result = result.replace(/\{\{observacoes\}\}|\{observacoes\}|\[observacoes\]/gi, contact.observacoes || '');
+      result = result.replace(/\{\{categoria\}\}|\{categoria\}|\[categoria\]/gi, ''); // Por enquanto vazio
 
       // Variáveis de cobrança (Mercado Pago)
       if (billingCharge) {
         const valorFormatado = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(billingCharge.amount);
         const vencimentoFormatado = new Date(billingCharge.dueDate).toLocaleDateString('pt-BR');
         
-        result = result.replace(/\{\{valor\}\}/g, valorFormatado);
-        result = result.replace(/\{\{vencimento\}\}/g, vencimentoFormatado);
-        result = result.replace(/\{\{link_pagamento\}\}/g, billingCharge.boletoUrl || '');
+        result = result.replace(/\{\{valor\}\}|\{valor\}|\[valor\]/gi, valorFormatado);
+        result = result.replace(/\{\{vencimento\}\}|\{vencimento\}|\[vencimento\]/gi, vencimentoFormatado);
+        result = result.replace(/\{\{link_pagamento\}\}|\{link_pagamento\}|\[link_pagamento\]/gi, billingCharge.boletoUrl || '');
       } else {
-        result = result.replace(/\{\{valor\}\}/g, '');
-        result = result.replace(/\{\{vencimento\}\}/g, '');
-        result = result.replace(/\{\{link_pagamento\}\}/g, '');
+        result = result.replace(/\{\{valor\}\}|\{valor\}|\[valor\]/gi, '');
+        result = result.replace(/\{\{vencimento\}\}|\{vencimento\}|\[vencimento\]/gi, '');
+        result = result.replace(/\{\{link_pagamento\}\}|\{link_pagamento\}|\[link_pagamento\]/gi, '');
       }
 
       console.log(`🔧 Processed text:`, result);

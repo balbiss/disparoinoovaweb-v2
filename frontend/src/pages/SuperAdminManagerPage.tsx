@@ -199,7 +199,7 @@ type FinanceSettingsFormData = z.infer<typeof financeSettingsSchema>;
 
 
 export function SuperAdminManagerPage() {
-  const [activeTab, setActiveTab] = useState<'general' | 'appearance' | 'integrations' | 'tenants' | 'users' | 'backup' | 'finance'>('general');
+  const [activeTab, setActiveTab] = useState<'general' | 'appearance' | 'integrations' | 'tenants' | 'users' | 'backup' | 'finance' | 'apidocs'>('general');
   const [tenants, setTenants] = useState<Tenant[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [stats, setStats] = useState<SystemStats | null>(null);
@@ -239,6 +239,74 @@ export function SuperAdminManagerPage() {
 
   const [activeModal, setActiveModal] = useState<'waha' | 'evolution' | 'quepasa' | null>(null);
   const [integrationSettings, setIntegrationSettings] = useState<Settings | null>(null);
+  const [apiDocsSection, setApiDocsSection] = useState('auth');
+
+  const apiDocsData: Record<string, { endpoints: any[] }> = {
+    auth: {
+      endpoints: [{
+        method: 'POST', path: '/api/auth/login',
+        description: 'Realiza a autenticação e retorna o Bearer Token para usar nas demais rotas.',
+        requestBody: { email: 'seu@email.com', senha: 'sua_senha' },
+        response: { success: true, data: { token: 'eyJhbGciOiJIUzI1NiJ9...', user: { id: 'uuid', nome: 'Nome', email: 'seu@email.com', role: 'USER' } } }
+      }]
+    },
+    contacts: {
+      endpoints: [
+        {
+          method: 'GET', path: '/api/contatos?page=1&limit=10',
+          description: 'Lista os contatos do tenant com paginação. Requer Bearer Token no header.',
+          response: { success: true, data: [{ id: 'uuid', nome: 'João Silva', telefone: '5511999999999', tags: ['cliente'] }], meta: { total: 1, page: 1 } }
+        },
+        {
+          method: 'POST', path: '/api/contatos',
+          description: 'Cria um novo contato. Requer Bearer Token.',
+          requestBody: { nome: 'Maria Silva', telefone: '5511888888888', email: 'maria@email.com', tags: ['lead'], categoriaId: 'uuid-opcional' },
+          response: { success: true, data: { id: 'novo-uuid', nome: 'Maria Silva', telefone: '5511888888888' } }
+        },
+        {
+          method: 'PUT', path: '/api/contatos/:id',
+          description: 'Atualiza um contato existente.',
+          requestBody: { nome: 'Maria Atualizada', telefone: '5511888888888' },
+          response: { success: true, data: { id: 'uuid', nome: 'Maria Atualizada' } }
+        },
+        {
+          method: 'DELETE', path: '/api/contatos/:id',
+          description: 'Remove um contato pelo ID.',
+          response: { success: true, message: 'Contato removido com sucesso' }
+        }
+      ]
+    },
+    campaigns: {
+      endpoints: [{
+        method: 'POST', path: '/api/campaigns',
+        description: 'Cria e inicia uma nova campanha de disparo. Requer Bearer Token.',
+        requestBody: { nome: 'Promoção de Verão', mensagem: 'Olá {nome}, confira!', connectionId: 'uuid-conexao-whatsapp', contatos: ['uuid-1', 'uuid-2'] },
+        response: { success: true, data: { id: 'uuid-campanha', nome: 'Promoção de Verão', status: 'PENDING' } }
+      }]
+    },
+    webhooks: {
+      endpoints: [
+        {
+          method: 'POST', path: '/api/webhooks/incoming/:webhookId',
+          description: 'Recebe leads de fontes externas (Typebot, n8n, formulários). Não requer autenticação.',
+          requestBody: { nome: 'Lead Externo', telefone: '5511977777777', tags: ['origem_typebot'] }
+        },
+        {
+          method: 'POST', path: '/api/webhooks/syncpay',
+          description: 'URL oficial para configurar no painel SyncPay. Recebe confirmações de pagamento Pix e libera/renova o acesso do cliente automaticamente.',
+          requestBody: { event: 'transaction.updated', data: { id: 'syncpay_tx_123456', status: 'PAID', amount: 97.00 } },
+          response: { message: 'OK' }
+        }
+      ]
+    },
+    whatsapp: {
+      endpoints: [{
+        method: 'GET', path: '/api/waha/sessions',
+        description: 'Lista todas as instâncias (sessões) do WhatsApp ativas e seus status. Requer Bearer Token.',
+        response: { success: true, data: [{ id: 'uuid', nome: 'Suporte Principal', status: 'CONNECTED', numero: '5511999999999' }] }
+      }]
+    }
+  };
 
   // General settings states
   const [generalSettings, setGeneralSettings] = useState<Settings | null>(null);
@@ -1155,6 +1223,16 @@ export function SuperAdminManagerPage() {
             }`}
           >
             💰 Financeiro / Planos
+          </button>
+          <button
+            onClick={() => setActiveTab('apidocs')}
+            className={`py-2 px-1 border-b-2 font-medium text-sm ${
+              activeTab === 'apidocs'
+                ? 'border-blue-500 text-blue-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+            }`}
+          >
+            💻 Docs da API
           </button>
         </nav>
       </div>
@@ -2221,6 +2299,33 @@ export function SuperAdminManagerPage() {
               </p>
             </div>
 
+            <div className="pt-4 border-t border-gray-200 mt-6 mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                🔗 Link de Cadastro (Criar Empresa / Assinar)
+              </label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  readOnly
+                  value={`${window.location.origin}/signup`}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-600 focus:outline-none"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    navigator.clipboard.writeText(`${window.location.origin}/signup`);
+                    toast.success('Link copiado!');
+                  }}
+                  className="px-4 py-2 bg-blue-50 text-blue-600 border border-blue-200 rounded-md hover:bg-blue-100 whitespace-nowrap font-medium transition-colors"
+                >
+                  Copiar
+                </button>
+              </div>
+              <p className="text-xs text-gray-500 mt-2">
+                Envie este link para que seus clientes possam criar a própria conta, escolher o plano e realizar o pagamento.
+              </p>
+            </div>
+
             <button
               type="submit"
               disabled={isGeneralSubmitting}
@@ -2674,6 +2779,79 @@ export function SuperAdminManagerPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* API Docs Tab */}
+      {activeTab === 'apidocs' && (
+        <div className="flex gap-6">
+          {/* Sidebar da doc */}
+          <div className="w-56 flex-shrink-0">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+              <div className="p-3 bg-gray-50 border-b text-xs font-semibold text-gray-500 uppercase tracking-wider">Seções</div>
+              {[
+                { key: 'auth', label: '🔐 Autenticação' },
+                { key: 'contacts', label: '👤 Contatos' },
+                { key: 'campaigns', label: '📢 Campanhas' },
+                { key: 'webhooks', label: '🔗 Webhooks' },
+                { key: 'whatsapp', label: '📱 WhatsApp' },
+              ].map(({ key, label }) => (
+                <button
+                  key={key}
+                  onClick={() => setApiDocsSection(key)}
+                  className={`w-full text-left px-4 py-2.5 text-sm transition-colors border-b border-gray-100 ${
+                    apiDocsSection === key ? 'bg-blue-50 text-blue-700 font-medium' : 'text-gray-700 hover:bg-gray-50'
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Conteúdo da doc */}
+          <div className="flex-1 space-y-6">
+            {apiDocsData[apiDocsSection]?.endpoints.map((ep: any, i: number) => (
+              <div key={i} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                <div className="px-5 py-3 border-b bg-gray-50 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <span className={`px-2.5 py-0.5 rounded text-xs font-bold border ${
+                      ep.method === 'GET' ? 'bg-blue-100 text-blue-800 border-blue-200' :
+                      ep.method === 'POST' ? 'bg-green-100 text-green-800 border-green-200' :
+                      ep.method === 'PUT' ? 'bg-yellow-100 text-yellow-800 border-yellow-200' :
+                      'bg-red-100 text-red-800 border-red-200'
+                    }`}>{ep.method}</span>
+                    <code className="text-sm font-mono text-gray-900">{ep.path}</code>
+                  </div>
+                  <button
+                    onClick={() => { navigator.clipboard.writeText(ep.path); }}
+                    className="text-xs text-gray-400 hover:text-gray-600 border border-gray-200 px-2 py-1 rounded"
+                  >Copiar URL</button>
+                </div>
+                <div className="p-5 space-y-4">
+                  <p className="text-sm text-gray-600">{ep.description}</p>
+                  {ep.requestBody && (
+                    <div>
+                      <p className="text-xs font-semibold text-gray-500 uppercase mb-1">Body (JSON)</p>
+                      <div className="relative">
+                        <pre className="bg-gray-900 text-green-400 rounded p-3 text-xs overflow-x-auto font-mono">{JSON.stringify(ep.requestBody, null, 2)}</pre>
+                        <button
+                          onClick={() => navigator.clipboard.writeText(JSON.stringify(ep.requestBody, null, 2))}
+                          className="absolute top-2 right-2 text-xs bg-gray-700 hover:bg-gray-600 text-gray-300 px-2 py-1 rounded"
+                        >Copiar</button>
+                      </div>
+                    </div>
+                  )}
+                  {ep.response && (
+                    <div>
+                      <p className="text-xs font-semibold text-gray-500 uppercase mb-1">Resposta de Sucesso</p>
+                      <pre className="bg-gray-800 text-gray-100 rounded p-3 text-xs overflow-x-auto font-mono">{JSON.stringify(ep.response, null, 2)}</pre>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       )}

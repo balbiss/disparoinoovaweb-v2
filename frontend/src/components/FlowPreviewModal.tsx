@@ -275,16 +275,16 @@ export function FlowPreviewModal({ nodes, edges, onClose }: FlowPreviewModalProp
   };
 
   return (
-    <aside className="w-96 bg-white border-l border-gray-200 flex flex-col shadow-2xl z-40">
+    <aside className="w-[320px] max-w-[90vw] h-[85vh] absolute bottom-4 right-4 bg-white rounded-2xl flex flex-col shadow-2xl z-40 overflow-hidden border border-gray-200">
       {/* Header */}
-      <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between bg-gradient-to-r from-purple-600 to-indigo-600">
+      <div className="px-5 py-3 border-b border-gray-200 flex items-center justify-between bg-brand-primary">
         <div className="flex items-center space-x-3">
           <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center">
             <span className="text-2xl">🤖</span>
           </div>
           <div>
-            <h2 className="text-lg font-bold text-white">Preview do Bot</h2>
-            <p className="text-xs text-purple-100">Teste o fluxo antes de publicar</p>
+            <h2 className="text-base font-bold text-white">Preview do Bot</h2>
+            <p className="text-xs text-brand-secondary">Teste o fluxo antes de publicar</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -322,14 +322,14 @@ export function FlowPreviewModal({ nodes, edges, onClose }: FlowPreviewModalProp
             className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
           >
             {message.type === 'bot' && (
-              <div className="w-7 h-7 bg-purple-100 rounded-full flex items-center justify-center mr-2 mt-1 flex-shrink-0">
+              <div className="w-7 h-7 bg-brand-secondary/20 rounded-full flex items-center justify-center mr-2 mt-1 flex-shrink-0">
                 <span className="text-sm">🤖</span>
               </div>
             )}
             <div
-              className={`max-w-[75%] rounded-2xl px-4 py-2.5 ${
+              className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm ${
                 message.type === 'user'
-                  ? 'bg-purple-600 text-white rounded-br-none'
+                  ? 'bg-brand-primary text-white rounded-br-none'
                   : 'bg-white text-gray-800 shadow-sm rounded-bl-none border border-gray-100'
               }`}
             >
@@ -357,7 +357,7 @@ export function FlowPreviewModal({ nodes, edges, onClose }: FlowPreviewModalProp
               {(!message.mediaType || message.mediaType !== 'document') && (
                 <p className="text-sm whitespace-pre-wrap">{message.content}</p>
               )}
-              <p className={`text-xs mt-1 ${message.type === 'user' ? 'text-purple-200' : 'text-gray-400'}`}>
+              <p className={`text-[10px] mt-1 ${message.type === 'user' ? 'text-brand-secondary/70' : 'text-gray-400'}`}>
                 {message.timestamp.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
               </p>
             </div>
@@ -377,7 +377,7 @@ export function FlowPreviewModal({ nodes, edges, onClose }: FlowPreviewModalProp
         {flowEnded ? (
           <div className="text-center">
             <p className="text-xs text-gray-500 mb-2">Fluxo concluído</p>
-            <button onClick={handleRestart} className="px-4 py-2 bg-purple-600 text-white rounded-xl text-sm hover:bg-purple-700 transition-colors">
+            <button onClick={handleRestart} className="px-4 py-2 bg-brand-primary text-white rounded-xl text-sm hover:bg-brand-primary/90 transition-colors w-full">
               🔄 Reiniciar Preview
             </button>
           </div>

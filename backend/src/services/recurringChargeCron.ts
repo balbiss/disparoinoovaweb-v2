@@ -79,8 +79,7 @@ async function processRecurringCharges() {
                 amount: recurring.amount,
                 dueDate: nextDueDate,
                 status: 'PENDING',
-                description: recurring.description,
-                paymentUrl: mpCharge.initPoint,
+                boletoUrl: mpCharge.initPoint, // Usar boletoUrl como paymentUrl pois não há campo paymentUrl
                 mercadoPagoId: mpCharge.id
               }
             });

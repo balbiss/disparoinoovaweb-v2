@@ -496,8 +496,30 @@ export const interactiveCampaignDispatchService = {
           continue;
         }
 
-        // Ignorar nós que não são de envio de mensagem mas não requerem parada
-        if (['trigger', 'delay'].includes(nodeType)) {
+        // Parar em delay
+        if (nodeType === 'delay') {
+          const delaySeconds = nodeConfig?.value || nodeConfig?.delaySeconds || nodeConfig?.seconds || nodeConfig?.delay || 0;
+          console.log(`⏱️ Waiting ${delaySeconds} seconds for delay node ${nextNode.id}`);
+          if (delaySeconds > 0) {
+            await new Promise(resolve => setTimeout(resolve, delaySeconds * 1000));
+          }
+          
+          if (sessionId) {
+            try {
+              await interactiveCampaignSessionService.addVisitedNode(
+                sessionId,
+                nextNode.id,
+                true
+              );
+            } catch (e) {}
+          }
+          
+          nextNodeId = nextNode.id;
+          continue;
+        }
+
+        // Ignorar nós trigger
+        if (nodeType === 'trigger') {
           console.log(`⏭️ Skipping node type ${nodeType}`);
           nextNodeId = nextNode.id;
           continue;

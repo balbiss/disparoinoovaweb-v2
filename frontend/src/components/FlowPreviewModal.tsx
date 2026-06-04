@@ -78,9 +78,23 @@ export function FlowPreviewModal({ nodes, edges, onClose }: FlowPreviewModalProp
   const processNode = (node: Node) => {
     setCurrentNodeId(node.id);
 
-    if (node.data?.nodeType === 'action') {
+    const messageNodeTypes = ['action', 'text', 'image', 'video', 'audio', 'document'];
+
+    if (messageNodeTypes.includes(node.data?.nodeType)) {
       // Enviar mensagem do bot
-      const content = node.data.config?.content || node.data.config?.message || 'Mensagem não configurada';
+      let content = 'Mídia não suportada no preview';
+      if (node.data?.nodeType === 'text' || node.data?.nodeType === 'action') {
+        content = node.data.config?.content || node.data.config?.message || 'Mensagem vazia';
+      } else if (node.data?.nodeType === 'image') {
+        content = `📷 [Imagem] ${node.data.config?.caption || ''}`;
+      } else if (node.data?.nodeType === 'video') {
+        content = `🎥 [Vídeo] ${node.data.config?.caption || ''}`;
+      } else if (node.data?.nodeType === 'audio') {
+        content = `🎵 [Áudio]`;
+      } else if (node.data?.nodeType === 'document') {
+        content = `📄 [Documento] ${node.data.config?.fileName || ''}`;
+      }
+      
       addMessage('bot', content);
 
       // Verificar próximo nó
@@ -99,6 +113,19 @@ export function FlowPreviewModal({ nodes, edges, onClose }: FlowPreviewModalProp
         setTimeout(() => {
           addMessage('bot', '✅ Fim do fluxo.');
         }, 500);
+      }
+    } else if (node.data?.nodeType === 'delay') {
+      const delaySeconds = node.data.config?.value || node.data.config?.delaySeconds || node.data.config?.seconds || node.data.config?.delay || 0;
+      addMessage('bot', `⏱️ [Aguardando ${delaySeconds}s...]`);
+      
+      const nextEdge = edges.find(e => e.source === node.id);
+      if (nextEdge) {
+        const nextNode = nodes.find(n => n.id === nextEdge.target);
+        if (nextNode) {
+          setTimeout(() => processNode(nextNode), delaySeconds * 1000);
+        }
+      } else {
+        setTimeout(() => addMessage('bot', '✅ Fim do fluxo.'), delaySeconds * 1000);
       }
     } else if (node.data?.nodeType === 'condition') {
       // Aguardar resposta do usuário

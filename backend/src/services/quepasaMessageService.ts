@@ -185,8 +185,9 @@ export async function sendMessageViaQuepasa(
 
     // Normalizar número para formato sem caracteres especiais
     const normalizedPhone = phone.replace(/\D/g, '');
+    const chatId = `${normalizedPhone}@s.whatsapp.net`;
 
-    console.log(`📤 Sending message via Quepasa to ${normalizedPhone} (usando token da sessão):`, content);
+    console.log(`📤 Sending message via Quepasa to ${chatId} (usando token da sessão):`, content);
 
     // Preparar payload baseado no tipo de conteúdo
     let payload: any = {};
@@ -255,13 +256,13 @@ export async function sendMessageViaQuepasa(
         'Content-Type': 'application/json',
         'X-QUEPASA-USER': quepasaConfig.login,
         'X-QUEPASA-TOKEN': sessionToken,
-        'X-QUEPASA-CHATID': normalizedPhone
+        'X-QUEPASA-CHATID': chatId
       },
       body: JSON.stringify(payload)
     });
 
     console.log(`📡 Quepasa request sent to: ${quepasaConfig.url}/send`);
-    console.log(`📡 Headers: X-QUEPASA-USER=${quepasaConfig.login}, X-QUEPASA-CHATID=${normalizedPhone}, Token: da sessão`);
+    console.log(`📡 Headers: X-QUEPASA-USER=${quepasaConfig.login}, X-QUEPASA-CHATID=${chatId}, Token: da sessão`);
 
     if (!response.ok) {
       const errorText = await response.text();

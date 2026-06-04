@@ -2,6 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  html {
+    /* Aplica um "zoom out" global de 12.5% em toda a interface do SaaS */
+    font-size: 87.5%;
+  }
+}
+
 /* Modal QR Code */
 .qr-modal-overlay {
   position: fixed;

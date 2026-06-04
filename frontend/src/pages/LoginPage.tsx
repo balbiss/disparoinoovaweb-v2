@@ -40,10 +40,10 @@ export function LoginPage() {
       <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-brand-primary/10 blur-[120px] mix-blend-multiply animate-pulse" style={{ animationDuration: '8s' }}></div>
       <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-brand-secondary/10 blur-[120px] mix-blend-multiply animate-pulse" style={{ animationDuration: '10s' }}></div>
 
-      <div className="w-full max-w-5xl bg-white/80 backdrop-blur-xl border border-white/50 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.08)] overflow-hidden relative z-10">
-        <div className="flex flex-col lg:flex-row min-h-[600px]">
+      <div className="w-full max-w-3xl bg-white/80 backdrop-blur-xl border border-white/50 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.08)] overflow-hidden relative z-10 mx-4">
+        <div className="flex flex-col md:flex-row min-h-[400px]">
           {/* Lado Esquerdo - Branding */}
-          <div className="lg:w-1/2 p-12 flex flex-col items-center justify-center relative overflow-hidden text-white" style={{ background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)' }}>
+          <div className="md:w-1/2 p-6 flex flex-col items-center justify-center relative overflow-hidden text-white" style={{ background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)' }}>
             
             {/* Decorações do painel escuro */}
             <div className="absolute top-0 right-0 -mt-16 -mr-16 w-64 h-64 bg-white/5 rounded-full blur-3xl"></div>
@@ -86,11 +86,11 @@ export function LoginPage() {
           </div>
 
           {/* Lado Direito - Formulário */}
-          <div className="lg:w-1/2 p-10 sm:p-14 lg:p-16 flex flex-col justify-center bg-white">
+          <div className="md:w-1/2 p-6 sm:p-8 flex flex-col justify-center bg-white">
             <div className="w-full max-w-sm mx-auto">
-              <div className="mb-10">
-                <h2 className="text-3xl font-bold text-slate-800 mb-3 tracking-tight">Bem-vindo de volta!</h2>
-                <p className="text-slate-500 font-medium">Faça login para acessar o painel de controle.</p>
+              <div className="mb-6">
+                <h2 className="text-xl font-bold text-slate-800 mb-1 tracking-tight">Bem-vindo de volta!</h2>
+                <p className="text-xs text-slate-500 font-medium">Faça login para acessar o painel de controle.</p>
               </div>
 
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">

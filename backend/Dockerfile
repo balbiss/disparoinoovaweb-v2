@@ -30,6 +30,9 @@ RUN sed -i 's/\r$//' start.sh
 RUN chmod +x start.sh && chown nodejs:nodejs start.sh
 RUN chown -R nodejs:nodejs /app/node_modules/@prisma || true
 RUN chmod -R 755 /app/node_modules/@prisma || true
+RUN chown -R nodejs:nodejs /app/node_modules/.prisma || true
+RUN chmod -R 755 /app/node_modules/.prisma || true
+RUN chown -R nodejs:nodejs /app/node_modules /app/dist || true
 
 USER nodejs
 
